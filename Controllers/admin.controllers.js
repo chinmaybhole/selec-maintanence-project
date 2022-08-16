@@ -121,15 +121,15 @@ const updateUser = async(req, res) => {
                     }
 
                     // checks the largest length amongest old and new data array
-                    let {length, obj} = getLength(category, assetCategory)
+                    let {length, obj} = getLength(category, assetCategory,"assetCategory")
 
-                    // checks for redundant value and returns nonredundant values
-                    let {nonRedundant} = checkReduncancy(length,obj,assetCategory)
+                    // checks for redundant value and returns nonsimilardata values
+                    let {nonsimilardata} = checkReduncancy(length,obj,assetCategory)
 
-                    if(nonRedundant !== undefined){
+                    if(nonsimilardata !== undefined){
                         let data = []
-                        for (let i in nonRedundant){
-                            config = await assetsconfig.find({asset_name: nonRedundant[i]})
+                        for (let i in nonsimilardata){
+                            config = await assetsconfig.find({asset_name: nonsimilardata[i]})
                             data.push(config[0]) 
                         }
                         req.body.asset_category = data
@@ -161,13 +161,13 @@ const updateUser = async(req, res) => {
                     // checks the largest length amongest old and new data array
                     let {length, obj} = getLength(skills, techskills)
 
-                    // checks for redundant value and returns nonredundant values
-                    let nonRedundant = checkReduncancy(length,obj,techskills)
+                    // checks for redundant value and returns nonsimilardata values
+                    let nonsimilardata = checkReduncancy(length,obj,techskills)
 
-                    if (nonRedundant !== undefined){
+                    if (nonsimilardata !== undefined){
                         let data = []
-                        for (let i in nonRedundant){
-                            skills = await Asset.find({asset_name: nonRedundant[i]})
+                        for (let i in nonsimilardata){
+                            skills = await Asset.find({asset_name: nonsimilardata[i]})
                             data.push(skills[0]) 
                         }
                         req.body.skills = data
@@ -377,20 +377,20 @@ const updateAssetCategory = async(req, res) => {
             // checking similar asset data in asset_list to avoid redundency 
 
             // checks the largest length amongest old and new data array
-            let {length, obj} = getLength(oldAssetData, newdata)
+            let {length, obj} = getLength(oldAssetData, newdata,"assetCategory")
 
-            // checks for redundant value and returns nonredundant values
-            let {nonRedundant} = checkReduncancy(length,obj,newdata)
+            // checks for redundant value and returns nonsimilardata values
+            let {nonsimilardata} = checkReduncancy(length,obj,newdata)
 
-            if(nonRedundant !== undefined){
-                if (nonRedundant.length > 1) {
-                    for (let i in nonRedundant) {
-                        const updateasset = await Asset.find({ asset_name: nonRedundant[i] })
+            if(nonsimilardata !== undefined){
+                if (nonsimilardata.length > 1) {
+                    for (let i in nonsimilardata) {
+                        const updateasset = await Asset.find({ asset_name: nonsimilardata[i] })
                         udata.push(updateasset[0]) 
                     }
                     req.body.asset_list = udata
                 } else {
-                    const updateasset = await Asset.find({ asset_name: nonRedundant })
+                    const updateasset = await Asset.find({ asset_name: nonsimilardata })
                     req.body.asset_list = updateasset[0]
                 }
 
@@ -646,14 +646,14 @@ const getChecklist = async(req,res) => {
     try {
 
         if(req.query.machine_name){
-            const getchecklist = await checklist.find({machine_name: req.query.machine_name})
+            const getchecklist = await checklist.find({machine_name: req.query.machine_name}).populate("machine_name","model_name").exec()
             const total = getchecklist.length
 
             if(total == 0) return res.status(404).json({msg: "no checklist found"})
 
             return res.status(200).json({checklist: getchecklist, total: total})
         }
-        const getchecklist = await checklist.find({})
+        const getchecklist = await checklist.find({}).populate('machine_name','model_name').populate('task_list','task').exec()
         const total = getchecklist.length
 
         if(total == 0) return res.status(404).json({msg: "no checklist found"})
@@ -692,52 +692,65 @@ const addChecklist = async(req,res) => {
             // find machine from machine table and replace it with req.body.machine
             const machine = await machinedata.find({model_name: req.body.machine_name})
             if (machine.length == 0) return res.status(404).json({msg: "machine not found"})           
-            req.body.machine = machine
+            req.body.machine_name = machine[0]
 
             // if tasklist exists in req body
-            if(req.body.checklist){
-                const newchecklist = req.body.checklist
-
-                // check if tasklist already exists?
+            if(req.body.task_list){
+                const newchecklist = req.body.task_list
+                const oldtasklist = await tasklist.find({})
                 
-                const oldtasklist = tasklist.find({})
-                
-                // checks the largest length amongest old and new data array
-                let {length,obj} =  getLength(oldtasklist,newchecklist)
-
-                // checks for redundant value and returns nonredundant and redendant values
-                let {nonRedundant,redundant} = checkReduncancy(length,obj,newchecklist)
-
-                let taskid = []
-                if (nonRedundant.length != 0 && redundant.length != 0){
-                    // create the new tasklist if tasklist doesnot exists 
-                    for(let i in nonRedundant){
-                        const newtask = new tasklist(nonRedundant[i])
+                // if no tasklist exists then. else ....
+                let tasks = []
+                if (oldtasklist.length == 0){   
+                    for (let i in newchecklist){
+                        const newtask = new tasklist({task: newchecklist[i]})
                         await newtask.save()
-
+                        
                         // store newly added tasklist's id to a list
-                        taskid.push(newtask._id)
+                        tasks.push(newtask)
+                    }
+                    
+                    req.body.task_list = tasks
+    
+                }else{
+                    // checks the largest length amongest old and new data array
+                    let {length,obj} =  getLength(oldtasklist,newchecklist,"checkList")
+
+                    // checks for redundant value and returns nonsimilardata and redendant values
+                    let {nonsimilardata,similardata} = checkReduncancy(length,obj,newchecklist)
+
+                    if (nonsimilardata.length != 0 && similardata.length != 0){
+                        // create the new tasklist if tasklist doesnot exists 
+                        for(let i in nonsimilardata){
+                            const newtask = new tasklist({task: nonsimilardata[i]})
+                            await newtask.save()
+
+                            // store newly added tasklist's id to a list
+                            tasks.push(newtask)
+                        }
+
+                        // find the existing tasklist and append the tasklist's id to a list
+                        for (let i in similardata){
+                            const oldtask = await tasklist.find({task: similardata[i]})
+                            tasks.push(oldtask[0])
+                        }
+
+                    // find the existing tasklist and append the tasklist's id to a list    
+                    }else if(similardata){
+                        for (let i in similardata){
+                            const oldtask = await tasklist.find({task: similardata[i]})
+                            tasks.push(oldtask[0])
+                        }
                     }
 
-                    // find the existing tasklist and append the tasklist's id to a list
-                    for (let i in redundant){
-                        const oldtask = await tasklist.find({task: redundant[i]})
-                        taskid.push(oldtask[0]._id)
-                    }
-
-                // find the existing tasklist and append the tasklist's id to a list    
-                }else if(redundant){
-                    for (let i in redundant){
-                        const oldtask = await tasklist.find({task: redundant[i]})
-                        taskid.push(oldtask[0]._id)
-                    }
+                    req.body.task_list = tasks
                 }
-
-                req.body.checklist = taskid
+                
             }
-
+            console.log(req.body)
             // finally create the checklist and save
             const newchecklist = new checklist(req.body)
+            // add checklist id to new tasklist after saving the checklist data 
             await newchecklist.save()
             return res.status(201).json({msg: "checklist added successfully"})
 

@@ -6,7 +6,6 @@ const ticket = Schema({
         type: Schema.Types.ObjectId,
         ref: "user"
     },
-//asset id
     subject: {
         type: String,
         maxlength: 150,
@@ -68,7 +67,6 @@ const ticket = Schema({
         require: true,
         default: "schdule"
     },
-
     asset_name: {
         type: Schema.Types.ObjectId,
         ref: "assetData"
@@ -77,7 +75,6 @@ const ticket = Schema({
         type: Boolean,
         default: false
     },
-
     accepted_by: {
         type: Schema.Types.ObjectId,
         ref: "user",
@@ -86,7 +83,6 @@ const ticket = Schema({
     location: {
         type: String
         // eg area 1 or area 2
-
     }
 })
 

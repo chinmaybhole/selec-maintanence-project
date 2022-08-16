@@ -22,8 +22,6 @@ const Loginroute = require('./Routes/Login.routes') // Login routes
 app.use('/login', Loginroute);
 const adminRoutes = require('./Routes/admin.routes') // Admin routes
 app.use('/admin', adminRoutes);
-const techinternalroutes = require('./Routes/technician.routes');
-app.use('/technician',techinternalroutes)
 const requesteeRoutes = require('./Routes/requestee.routes') // Requestee routes
 app.use('/requestee', requesteeRoutes)
 const DummyRoute = require('./Routes/test.routes') // Dummy routes

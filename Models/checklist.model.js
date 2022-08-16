@@ -17,7 +17,6 @@ const taskList = new Schema({
     },
     status: {
         type: String,
-        require: true
     },
     remark: String,
     image: images,
@@ -35,7 +34,10 @@ const checkList = new Schema({
         require: true
     },
     date: Date,
-    checklist: [taskList],
+    task_list: [{
+        type: Schema.Types.ObjectId,
+        ref: 'tasklist'
+    }],
     checklist_status: {
         type: String,
     }

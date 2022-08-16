@@ -10,13 +10,13 @@ const { Asset } = require('../Models/assets.model')
 const getTickets = async(req,res)=>{
     try {
         if(req.query.subject){
-            const ticket = await Ticket.find({ subject: { $regex: req.query.subject }})
+            const ticket = await Ticket.find({ subject: { $regex: req.query.subject }}).populate("asset_name").exec()
             if (!ticket) return res.status(404).json({msg:"no tickets found"})
             return res.status(200).json({ticket:ticket})
         }
 
         if(req.query.client_id){
-            const ticket = await Ticket.find({ client_id: req.query.client_id})
+            const ticket = await Ticket.find({ client_id: req.query.client_id}).populate("asset_name").exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({msg:"no tickets found"})
             return res.status(200).json({tickets:ticket,totalcount:total})
@@ -24,18 +24,18 @@ const getTickets = async(req,res)=>{
         }
 
         if(req.query.status){
-            const ticket = await Ticket.find({status : {$regex: req.query.status}})
+            const ticket = await Ticket.find({status : {$regex: req.query.status}}).populate("asset_name").exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({msg:"no tickets found"})
             return res.status(200).json({tickets:ticket,totalcount:total})
         }
 
         if(req.query.client_id && req.query.subject){
-            const ticket = await Ticket.find({ client_id: client_id, subject: { $regex: req.query.subject }})
+            const ticket = await Ticket.find({ client_id: client_id, subject: { $regex: req.query.subject }}).populate("asset_name").exec()
             if (!ticket) return res.status(404).json({msg:"no tickets found"})
             return res.status(200).json({ticket:ticket})
         }
-        const tickets = await Ticket.find({})
+        const tickets = await Ticket.find({}).populate("asset_name").exec()
         const total = tickets.length
         if (total === 0) return res.status(404).json({msg:"no tickets found"})
 
@@ -123,8 +123,6 @@ const addRequesteeTicket = async(req,res) => {
         }
 
         const newTicket = new Ticket(req.body)
-        console.log(newTicket)
-
         const ticketData = await newTicket.save()
         if (ticketData === null) return res.status(501).json({msg:"unable to create ticket, try again"})
         return res.status(201).json({msg: "ticket created successfully"})
