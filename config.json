@@ -14,7 +14,7 @@
         "DEPARTMENT_HEAD": "department-head",
         "REQUESTEE": "requestee"
     },
-    "INTERFACE":{
+    "INTERFACE": {
         "APP": "App",
         "EMAIL": "Email",
         "WEBAPP": "Webapp"

@@ -108,6 +108,18 @@ routers.get('/ticket', checkAuth, checkRole(config.ROLE.ADMIN), TicketController
 // get one ticket
 routers.get('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.getOneTicket)
 
+// add ticket
+routers.post('/add_ticket', checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.addRequesteeTicket)
+
+// update ticket
+routers.put('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.updateRequesteeTicket)
+
+// close ticket
+routers.patch('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.updatestatusRequesteeTicket)
+
+// delete ticket
+routers.delete('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.deleteRequesteeTicket)
+
 //////////////////////////////////////////////////// Checklist Section ///////////////////////////////////////////////
 
 // get checklists
