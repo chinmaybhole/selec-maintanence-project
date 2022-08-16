@@ -1,9 +1,9 @@
 # Dependency directories
-**node_modules/
+node_modules/
 loginFile.txt
 
 # Optional npm cache directory
 .npm
 
 # dotenv environment variable files
-.env
+# .env
