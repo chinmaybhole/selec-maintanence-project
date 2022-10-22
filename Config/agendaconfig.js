@@ -11,9 +11,10 @@ const agenda = new Agenda({
 
 // 'ready' - called when Agenda mongo connection is successfully opened and indices created.
 agenda.once('ready', () => {
+    // initializeJob(agenda)
     // initalized a job function which will define and process the job for respective tasks 
-    initializeJob(agenda)
-    
+    console.log("agenda ready")
+
 })
 
 // 'error' - called when Agenda mongo connection process has thrown an error

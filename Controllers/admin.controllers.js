@@ -5,6 +5,8 @@ const { Location } = require('../Models/location.model')
 const { Schedular } = require('../Models/schedular.model')
 const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
+const { addSchedularTicket } = require('../Controllers/ticket.controllers')
+const agenda = require('../config/agendaconfig')
 const utils = require('../Utils/common.utils')
 
 const bcrypt = require('bcrypt');
@@ -93,15 +95,15 @@ const addUser = async (req, res) => {
         const saltRounds = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(newUser.password, saltRounds)
 
-        newUser.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "user created successfully"});
+        newUser.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "user created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
-        res.status(201).json({msg: "user created successfully"});
+        res.status(201).json({ msg: "user created successfully" });
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -220,12 +222,12 @@ const updateUser = async (req, res) => {
             // convert any upper case letters to lower before sending to database
             req.body = utils.lowercasedata(req.body)
 
-            const up = await updateuser.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "user updated successfully"});
+            const up = await updateuser.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "user updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             });
         }
@@ -267,13 +269,13 @@ const addRole = async (req, res) => {
         // convert any upper case letters to lower before sending to database
         req.body = utils.lowercasedata(req.body)
 
-        const newRole = new Role(req.body)       
-        newRole.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "role created successfully"});
+        const newRole = new Role(req.body)
+        newRole.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "role created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
     } catch (error) {
@@ -337,12 +339,12 @@ const addAsset = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newAasset = new Asset(req.body)
-        newAasset.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "asset created successfully"});
+        newAasset.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "asset created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
 
@@ -387,12 +389,12 @@ const addAssetCategory = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const addassetcategory = new assetsconfig(req.body)
-        addassetcategory.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "category created successfully"});
+        addassetcategory.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "category created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -462,15 +464,15 @@ const updateAssetCategory = async (req, res) => {
                 // convert any upper case letters to lower before sending to database
                 req.body = utils.lowercasedata(req.body)
 
-                updateassetcategory.save((err,result)=>{
-                    if(!err){
-                        return res.status(200).json({msg: "category updated successfully"});
+                updateassetcategory.save((err, result) => {
+                    if (!err) {
+                        return res.status(200).json({ msg: "category updated successfully" });
                     }
-                    if(err){
-                        return res.status(501).json({msg: "an error occured, try again"});
+                    if (err) {
+                        return res.status(501).json({ msg: "an error occured, try again" });
                     }
                 });
-                
+
             }
             return res.status(422).json({ msg: "asset list already exits" })
         }
@@ -507,12 +509,12 @@ const addMachine = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newmachine = new machinedata(req.body)
-        newmachine.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "machine created successfully"});
+        newmachine.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "machine created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -561,12 +563,12 @@ const updateMachine = async (req, res) => {
             req.body = utils.lowercasedata(req.body)
 
             const machineupdate = await machinedata.findByIdAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true })
-            machineupdate.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "machine updated successfully"});
+            machineupdate.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "machine updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             })
         }
@@ -625,32 +627,56 @@ const getOneSchedule = async (req, res) => {
 const addSchedular = async (req, res) => {
     try {
 
-        if (req.body.ticket_selection ) {
-            const checklistexists = await Ticket.find({ asset_name: req.body.ticket_selection })
+        if (req.body.asset_id) {
+            assetdata = req.body.asset_id
+            const checklistexists = await checklist.findOne({ checklist_name: { $regex: req.body.checklist_selection } })
             if (checklistexists) {
-                req.body.asset_name = checklistexists[0].machine_name
-                req.body.checklist_selection = checklistexists[0]
-                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_time) {
+                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_time && req.body.location) {
 
-                    console.log(req.body)
-                    const newSchedule = new Schedular(req.body)
-                    newSchedule.save((err, result) => {
-                        if (!err) {
+                    // concatinates client given info into str (eg weekly on monday at 10:00)
+                    let schedule = req.body.schedular + " on " + req.body.day + " at " + req.body.start_time
+                    console.log(schedule)
+                    // sending data to create ticket as per the following schedule
 
-                            return res.status(201).json({ msg: "data saved successfully" })
-                        }
+                    // module.exports.ticketdata = {
+                    //     time : schedule,
+                    //     type : "schedule",
+                    //     handler : await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location)
+                    // }
 
-                        if (err) {
-                            console.log(err)
-                            return res.status(400).json({ error: err })
-                        }
-                    })
+                    const getScheduleTicket = await agenda.schedule(schedule, "ticket_schedular", {}, await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location))
 
-                } else return res.status(400).json({ msg: "must include all maintainence/schedular parameters " })
+                    console.log(getScheduleTicket)
+
+
+                    // sending data to create ticket as per the following schedule
+                    // const getScheduleTicket = await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location)
+
+                    // console.log(getScheduleTicket)
+                    // if (getScheduleTicket) {
+
+                    //     // let schedule = {
+                    //     //     schedular: req.body.schedular,
+                    //     //     day: req.body.day,
+                    //     //     start_time: req.body.start_time
+                    //     // }
+                    //     // exporting schedule data to jobs mapper
+                    //     // module.exports.schedule = schedule
+
+
+
+                    //     // data will be saved in the agenda 
+
+                    //     return res.status(201).json({ msg: "data saved successfully" })
+
+                    // }
+                    // else return res.status(500).json({ msg: "error while creating ticket. try again!" })
+
+                } else return res.status(400).json({ msg: "must include all maintainence/schedular parameters" })
 
             } else return res.status(404).json({ msg: "checklist not found" })
 
-        } else return res.status(400).json({ msg: "must include checklist " })
+        } else return res.status(400).json({ msg: "must include asset data" })
 
     } catch (error) {
         return new Error(error)
@@ -730,12 +756,12 @@ const addLocation = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newLocation = new Location(req.body)
-        newLocation.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "location created successfully"});
+        newLocation.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "location created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -784,7 +810,7 @@ const updateLocation = async (req, res) => {
     try {
         if (req.params.id) {
 
-            if (req.body.subdivision) { 
+            if (req.body.subdivision) {
                 let subdivisions = req.body.subdivision
 
                 if (subdivisions.length >= 2) {
@@ -835,12 +861,12 @@ const updateLocation = async (req, res) => {
             req.body = utils.lowercasedata(req.body)
 
             const updatelocation = await Location.findByIdAndUpdate({ _id: req.params.id }, { $push: req.body }, { new: true })
-            const updatedata = await updatelocation.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "location updated successfully"});
+            const updatedata = await updatelocation.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "location updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             })
         }

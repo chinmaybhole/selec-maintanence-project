@@ -115,7 +115,7 @@ const ticket = Schema({
         type: Schema.Types.ObjectId,
         ref: 'checkList'
     }
-})
+}, { timestamps: true })
 
 ticket.pre('deleteOne', { document: false, query: true }, async function (next) {
     const doc = await this.model.findOne(this.getFilter())

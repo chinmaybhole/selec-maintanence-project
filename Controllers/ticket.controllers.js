@@ -115,7 +115,7 @@ const getRequesteeOneTicket = async (req, res) => {
 // add ticket
 const addRequesteeTicket = async (req, res) => {
     try {
-        
+
         const username = req.valid.username  // data retrived from token
         const user = await findUser(username)
 
@@ -129,16 +129,52 @@ const addRequesteeTicket = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newTicket = new Ticket(req.body)
-        newTicket.save((err,result)=>{
-            if(err){
+        newTicket.save((err, result) => {
+            if (err) {
                 console.log(err)
                 return res.status(501).json({ msg: "unable to create ticket, try again" })
             }
-            if(!err){
+            if (!err) {
                 return res.status(201).json({ msg: "ticket created successfully" })
             }
         })
-        
+
+    } catch (error) {
+        return new Error({ error: error })
+    }
+}
+
+// add schedular ticket
+const addSchedularTicket = async (req, res, asset_id, checklist, location) => {
+    try {
+
+        // const username = req.valid.username  // data retrived from token
+        // const user = await findUser(username)
+
+        // // user.id of who created the ticket
+        // req.body.requestee_id = user._id
+
+        // check previous assets schedule tickets and set status close if any open
+        await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
+
+        // monthly maintenance suject
+        req.body = {
+            subject: 'asset maintenance',
+            description: 'regular maintenance',
+            checklist: checklist,
+            asset_name: asset_id,
+            location: location
+        }
+
+        // convert any upper case letters to lower before sending to database
+        req.body = utils.lowercasedata(req.body)
+
+        const newTicket = new Ticket(req.body)
+        let sendTicket = await newTicket.save()
+        if (!sendTicket) return sendTicket
+        if (sendTicket) return sendTicket
+
+
     } catch (error) {
         return new Error({ error: error })
     }
@@ -198,4 +234,4 @@ const deleteRequesteeTicket = async (req, res) => {
     }
 }
 
-module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket }
+module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket, addSchedularTicket }

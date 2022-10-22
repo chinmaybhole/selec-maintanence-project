@@ -1,4 +1,5 @@
 const jobsMapper = require('./jobs-mapper')
+const {agenda} = require('../config/agendaconfig')
 
 // initalizing agenda jobs
 async function initializeJob(agenda) {
@@ -14,7 +15,8 @@ async function initializeJob(agenda) {
             done();
         })
 
-        // providing details of type of process (for eg every,now), when the process should be repeated and name of the defined function
+        // providing details of type of process (for eg every,now), when the process should be repeated and 
+        // name of the defined function
         await agenda[jobsMapper[key].type](jobsMapper[key].time, key);
     })
 
