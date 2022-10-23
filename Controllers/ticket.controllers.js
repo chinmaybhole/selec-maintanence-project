@@ -234,4 +234,23 @@ const deleteRequesteeTicket = async (req, res) => {
     }
 }
 
-module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket, addSchedularTicket }
+const getAssetLocation = async (req, res) => {
+    try {
+        
+        // send only floor and rooms data of specific building
+        if(req.query.building_no){
+            const floorandrooms = await Location.find({unit_or_building: req.query.building_no}).select('subdivision').populate('subdivision.rooms.assets', 'model_name')
+            return res.status(200).json({floorandrooms: floorandrooms})
+        }
+
+        // send only building names
+        const buildings = await Location.find({}).select('unit_or_building')
+        return res.status(200).json({buildings: buildings})
+
+        
+    } catch (error) {
+        return new Error({error:error})
+    }
+}
+
+module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket, addSchedularTicket, getAssetLocation }

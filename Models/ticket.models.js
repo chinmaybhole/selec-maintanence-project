@@ -125,4 +125,4 @@ ticket.pre('deleteOne', { document: false, query: true }, async function (next) 
     next()
 })
 
-module.exports = { Ticket: mongoose.model("ticket", ticket) }
+module.exports = { Ticket: mongoose.model("ticket", ticket), locationdata }

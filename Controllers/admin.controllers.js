@@ -339,12 +339,50 @@ const addAsset = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newAasset = new Asset(req.body)
-        newAasset.save((err, result) => {
+        newAasset.save(async (err, result) => {
             if (!err) {
-                return res.status(201).json({ msg: "asset created successfully" });
+
+                // const options = {
+                //     arrayFilter:[
+                //         {
+                //             "division.$[room].room": req.body.asset_location.room
+                //         }
+                //     ],
+                //     new: true
+                // }
+                console.log(result)
+
+                const updatelocation = await Location.findOneAndUpdate({
+                    // "subdivision": { "$elemMatch": { room: req.body.asset_location.room } }
+                    unit_or_building: req.body.asset_location.unit_building,
+                    "subdivision.$.rooms.$.room" :  req.body.asset_location.room
+                },
+                    {
+                        $push: {
+                            // values added dynamically to $ 
+                            "room.assets.$": result._id
+                        }
+                    },  {new: true})
+
+                console.log(updatelocation)
+
+                if (updatelocation) {
+
+                    updatelocation.save((err, result) => {
+                        if (!err) {
+                            return res.status(201).json({ msg: "asset created successfully" });
+
+                        }
+                        if (err) {
+                            return res.status(501).json({ msg: "an error occured while updating location, try again" });
+                        }
+                    })
+                }
+
+
             }
             if (err) {
-                return res.status(501).json({ msg: "an error occured, try again" });
+                return res.status(501).json({ msg: "an error occured while adding asset, try again" });
             }
         });
 

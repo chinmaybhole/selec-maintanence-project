@@ -100,6 +100,9 @@ routers.put('/update_location/:id', checkAuth, checkRole(config.ROLE.ADMIN), adm
 // delete location
 routers.delete('/delete_location/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.deleteLocation)
 
+// get ticket location
+routers.get("/getAssetLocation", checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.getAssetLocation)
+
 //////////////////////////////////////////////////// Ticket Section ///////////////////////////////////////////////
 
 // get tickets
