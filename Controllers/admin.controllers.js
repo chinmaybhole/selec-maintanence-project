@@ -342,35 +342,31 @@ const addAsset = async (req, res) => {
         newAasset.save(async (err, result) => {
             if (!err) {
 
-                // const options = {
-                //     arrayFilter:[
-                //         {
-                //             "division.$[room].room": req.body.asset_location.room
-                //         }
-                //     ],
-                //     new: true
-                // }
-                console.log(result)
-
                 const updatelocation = await Location.findOneAndUpdate({
-                    // "subdivision": { "$elemMatch": { room: req.body.asset_location.room } }
+                    // elemMatch matches the given value within the provided key inside the document
+                    "subdivision": { "$elemMatch": { room: req.body.asset_location.room } },
                     unit_or_building: req.body.asset_location.unit_building,
-                    "subdivision.$.rooms.$.room" :  req.body.asset_location.room
                 },
+                {
+                    $push: {
+                        // values added dynamically to $ from arrayFilters
+                        "subdivision.$[outer].rooms.$[inner].assets": result._id
+                    }
+                }, { arrayFilters:[
                     {
-                        $push: {
-                            // values added dynamically to $ 
-                            "room.assets.$": result._id
-                        }
-                    },  {new: true})
-
-                console.log(updatelocation)
+                        "outer.floor": req.body.asset_location.floor
+                    },
+                    {
+                        "inner.room": req.body.asset_location.room
+                    }
+                ],
+                new: true})
 
                 if (updatelocation) {
 
                     updatelocation.save((err, result) => {
                         if (!err) {
-                            return res.status(201).json({ msg: "asset created successfully" });
+                            return res.status(201).json({ msg: "asset added successfully" });
 
                         }
                         if (err) {
@@ -382,7 +378,7 @@ const addAsset = async (req, res) => {
 
             }
             if (err) {
-                return res.status(501).json({ msg: "an error occured while adding asset, try again" });
+                return res.status(501).json({ err: err });
             }
         });
 
