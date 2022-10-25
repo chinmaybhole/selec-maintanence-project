@@ -41,6 +41,10 @@ const assetsConfig = new Schema({
     }
 }, { timestamps: true })
 
+// assetData.pre('deleteOne',function(next){
+//     this.model('location').deleteOne({})
+// })
+
 let assetsconfig = mongoose.model('assetsConfig', assetsConfig);
 let Asset = mongoose.model('assetData', assetData);
 module.exports = { assetsconfig, Asset }

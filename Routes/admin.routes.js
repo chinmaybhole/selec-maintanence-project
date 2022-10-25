@@ -41,6 +41,9 @@ routers.post('/add_assets', checkAuth, checkRole(config.ROLE.ADMIN), adminContro
 // Delete asset
 routers.delete('/delete_asset/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.deleteAsset)
 
+// add multiple assets
+routers.post('/addMultipleAsset',checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.addMultipleAsset)
+
 //////////////////////////////////////////////////// Asset Category Section //////////////////////////////////////////
 
 // Add asset category

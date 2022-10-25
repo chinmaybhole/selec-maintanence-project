@@ -346,36 +346,33 @@ const addAsset = async (req, res) => {
                     // elemMatch matches the given value within the provided key inside the document
                     "subdivision": { "$elemMatch": { room: req.body.asset_location.room } },
                     unit_or_building: req.body.asset_location.unit_building,
-                },
-                {
+                }, {
                     $push: {
                         // values added dynamically to $ from arrayFilters
-                        "subdivision.$[outer].rooms.$[inner].assets": result._id
+                        "subdivision.$[outer].rooms.$[inner].assets": result
                     }
-                }, { arrayFilters:[
-                    {
-                        "outer.floor": req.body.asset_location.floor
-                    },
-                    {
-                        "inner.room": req.body.asset_location.room
-                    }
-                ],
-                new: true})
+                }, {
+                    arrayFilters: [
+                        {
+                            "outer.floor": req.body.asset_location.floor
+                        },
+                        {
+                            "inner.room": req.body.asset_location.room
+                        }
+                    ],
+                    new: true
+                })
 
                 if (updatelocation) {
-
                     updatelocation.save((err, result) => {
                         if (!err) {
                             return res.status(201).json({ msg: "asset added successfully" });
-
                         }
                         if (err) {
                             return res.status(501).json({ msg: "an error occured while updating location, try again" });
                         }
                     })
                 }
-
-
             }
             if (err) {
                 return res.status(501).json({ err: err });
@@ -401,6 +398,23 @@ const deleteAsset = async (req, res) => {
         })
     } catch (error) {
         return new Error(error)
+    }
+}
+
+const addMultipleAsset = async (req, res) => {
+    try {
+
+
+        Asset.insertMany([], (err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "assets added succssfully" })
+            }
+            if (err) {
+                return res.status(501).json({ err: "en error occured while adding assets, try again" })
+            }
+        })
+    } catch (error) {
+        res.status(501).json(new Error({ err: error }))
     }
 }
 
@@ -830,7 +844,7 @@ const getLocation = async (req, res) => {
             }
         }
 
-        const getlocations = await Location.find({}).populate('subdivision.rooms.assets', 'model_name').limit(limit * 1).skip((page - 1) * limit).exec()
+        const getlocations = await Location.find({}).populate('subdivision.rooms.assets', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
         const totalcount = await Location.count({})
         if (totalcount === 0) return res.status(404).json({ message: "no locations found" })
         res.status(200).json({ locations: getlocations, total: totalcount })
@@ -1079,4 +1093,4 @@ const addChecklist = async (req, res) => {
         return new Error(error)
     }
 }
-module.exports = { getUsers, addUser, updateUser, deleteUser, addRole, getRoles, deleteRole, getAsset, addAsset, deleteAsset, addAssetCategory, getAssetCategory, deleteAssetCategory, updateAssetCategory, addMachine, getMachine, deleteMachine, updateMachine, getSchedular, getOneSchedule, addSchedular, updateSchedular, deleteSchedular, addLocation, getLocation, updateLocation, deleteLocation, getChecklist, getOneChecklist, addChecklist }
+module.exports = { getUsers, addUser, updateUser, deleteUser, addRole, getRoles, deleteRole, getAsset, addAsset, deleteAsset, addMultipleAsset, addAssetCategory, getAssetCategory, deleteAssetCategory, updateAssetCategory, addMachine, getMachine, deleteMachine, updateMachine, getSchedular, getOneSchedule, addSchedular, updateSchedular, deleteSchedular, addLocation, getLocation, updateLocation, deleteLocation, getChecklist, getOneChecklist, addChecklist }

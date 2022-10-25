@@ -8,7 +8,7 @@ const roomschema = new Schema({
     },
     assets: [{
         type: Schema.Types.ObjectId,
-        ref: 'machineData',
+        ref: 'assetData',
         require: true
     }],
 },{ _id : false })
