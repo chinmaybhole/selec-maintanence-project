@@ -11,3 +11,10 @@ loginFile.txt
 
 # docker files
 .dockerignore
+
+# Local Netlify folder
+
+.netlify
+dist/
+functions/
+netlify.toml
