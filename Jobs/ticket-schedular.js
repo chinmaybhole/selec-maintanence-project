@@ -1,22 +1,30 @@
 const { Ticket } = require('../Models/ticket.models')
+const utils = require('../Utils/common.utils')
+
 module.exports = {
-    async schedular(req, asset_id, checklist, location) {
+    async schedular(asset_id, scheduledata, checklistdata, locationdata) {
         try {
-            req.body = {
-                subject: 'asset maintenance',
-                description: 'regular maintenance',
-                checklist: checklist,
-                asset_name: asset_id,
-                location: location
-            }
 
-            // convert any upper case letters to lower before sending to database
-            req.body = utils.lowercasedata(req.body)
+        let schedule = schedule.bind(scheduledata)
+            
+        await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
 
-            const newTicket = new Ticket(req.body)
-            let sendTicket = await newTicket.save()
-            if (!sendTicket) return sendTicket
-            if (sendTicket) return sendTicket
+        // monthly maintenance suject
+        body = {
+            subject: 'asset maintenance',
+            description: 'regular maintenance',
+            checklist: checklistdata,
+            asset_name: asset_id,
+            location: locationdata
+        }
+
+        // convert any upper case letters to lower before sending to database
+        body = utils.lowercasedata(body)
+
+        const newTicket = new Ticket(body)
+        let sendTicket = await newTicket.save()
+        if (!sendTicket) return sendTicket
+        if (sendTicket) return sendTicket
 
         } catch (error) {
             return new Error({ error: error })

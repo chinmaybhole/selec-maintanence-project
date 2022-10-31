@@ -8,8 +8,9 @@ const {addSchedular} = require('../Controllers/admin.controllers')
 module.exports = {
 
     ticket_schedular: {
-        time: null,
-        type: 'every',
+        time: ticketSchedular.schedular.schedule,
+        type: 'schedule',
+        data: "ticket_data",
         handler: ticketSchedular.schedular1
     },
 

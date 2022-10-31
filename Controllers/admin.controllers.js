@@ -6,7 +6,7 @@ const { Schedular } = require('../Models/schedular.model')
 const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
 const { addSchedularTicket } = require('../Controllers/ticket.controllers')
-const agenda = require('../config/agendaconfig')
+const { schedular } = require('../Jobs/ticket-schedular')
 const utils = require('../Utils/common.utils')
 
 const bcrypt = require('bcrypt');
@@ -95,7 +95,7 @@ const addUser = async (req, res) => {
         const saltRounds = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(newUser.password, saltRounds)
 
-        newUser.save((err, result) => {
+        newUser.save(async (err, result) => {
             if (!err) {
                 return res.status(201).json({ msg: "user created successfully" });
             }
@@ -103,9 +103,8 @@ const addUser = async (req, res) => {
                 return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
-        res.status(201).json({ msg: "user created successfully" });
     } catch (error) {
-        res.json({ message: error.message });
+        res.json({ err: error });
     }
 }
 
@@ -401,6 +400,7 @@ const deleteAsset = async (req, res) => {
     }
 }
 
+// add multiple asset
 const addMultipleAsset = async (req, res) => {
     try {
 
@@ -686,13 +686,7 @@ const addSchedular = async (req, res) => {
                     console.log(schedule)
                     // sending data to create ticket as per the following schedule
 
-                    // module.exports.ticketdata = {
-                    //     time : schedule,
-                    //     type : "schedule",
-                    //     handler : await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location)
-                    // }
-
-                    const getScheduleTicket = await agenda.schedule(schedule, "ticket_schedular", {}, await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location))
+                    const getScheduleTicket = await schedular(assetdata, schedule, checklistexists, req.body.location)
 
                     console.log(getScheduleTicket)
 

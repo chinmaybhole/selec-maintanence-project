@@ -30,9 +30,9 @@ const checkList = new Schema({
         required: true,
         unique: true
     },
-    machine_name: {
+    asset_name: {
         type: Schema.Types.ObjectId,
-        ref: 'machineData',
+        ref: 'assetData',
         require: true
     },
     date: Date,
