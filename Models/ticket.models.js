@@ -91,16 +91,16 @@ const ticket = Schema({
     ticket_type: {
         type: String,
         required: true,
-        default: "schdule"
+        default: "schedule"
     },
     asset_name: {
         type: Schema.Types.ObjectId,
         ref: "assetData",
         required: true
     },
-    accepted: {
-        type: Boolean,
-        default: false
+    schedule_time:{
+        type: String,
+        default: null
     },
     accepted_by: {
         type: Schema.Types.ObjectId,

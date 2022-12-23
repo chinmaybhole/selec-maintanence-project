@@ -7,8 +7,8 @@ const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
 const { addSchedularTicket } = require('../Controllers/ticket.controllers')
 const { schedular } = require('../Jobs/ticket-schedular')
+const { crongen } = require('../Utils/crongen.utils')
 const utils = require('../Utils/common.utils')
-
 const bcrypt = require('bcrypt');
 
 //////////////////////////////////////////////////// User Section ////////////////////////////////////////////////////
@@ -676,43 +676,26 @@ const addSchedular = async (req, res) => {
     try {
 
         if (req.body.asset_id) {
-            assetdata = req.body.asset_id
+            let assetdata = req.body.asset_id
             const checklistexists = await checklist.findOne({ checklist_name: { $regex: req.body.checklist_selection } })
             if (checklistexists) {
-                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_time && req.body.location) {
+                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_date && req.body.start_time && req.body.location) {
 
-                    // concatinates client given info into str (eg weekly on monday at 10:00)
-                    let schedule = req.body.schedular + " on " + req.body.day + " at " + req.body.start_time
-                    console.log(schedule)
+                    // concatinates client given info into cron (eg weekly on monday at 10:00)
+                    let schedule = crongen(req.body.schedular,req.body.day,req.body.start_date,req.body.start_time)
+                    
                     // sending data to create ticket as per the following schedule
+                    const {tstatus, tresult} = await schedular(assetdata, schedule, checklistexists, req.body.location)
 
-                    const getScheduleTicket = await schedular(assetdata, schedule, checklistexists, req.body.location)
+                    console.log(tstatus)
+                    if(tstatus == 200){
 
-                    console.log(getScheduleTicket)
+                        // data will be saved in the agenda 
+                        return res.status(201).json({ msg: "data saved successfully" })
+                    }else{
+                        return res.status(500).json({ msg: "error while creating ticket. try again!" })
 
-
-                    // sending data to create ticket as per the following schedule
-                    // const getScheduleTicket = await addSchedularTicket(req, res, assetdata, checklistexists._id, req.body.location)
-
-                    // console.log(getScheduleTicket)
-                    // if (getScheduleTicket) {
-
-                    //     // let schedule = {
-                    //     //     schedular: req.body.schedular,
-                    //     //     day: req.body.day,
-                    //     //     start_time: req.body.start_time
-                    //     // }
-                    //     // exporting schedule data to jobs mapper
-                    //     // module.exports.schedule = schedule
-
-
-
-                    //     // data will be saved in the agenda 
-
-                    //     return res.status(201).json({ msg: "data saved successfully" })
-
-                    // }
-                    // else return res.status(500).json({ msg: "error while creating ticket. try again!" })
+                    }
 
                 } else return res.status(400).json({ msg: "must include all maintainence/schedular parameters" })
 

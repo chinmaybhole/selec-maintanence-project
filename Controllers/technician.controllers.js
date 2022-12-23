@@ -60,7 +60,7 @@ const ticketDisplay = async (req, res) => {
         let filteredTicketsList = []
         for (let i in userskills) {
             let userskill = userskills[i].toString()
-            const filteredTicket = await Ticket.find({ asset_name: userskill, accepted_by: null, accepted: false, ticket_type: 'trouble' }).populate('asset_name', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
+            const filteredTicket = await Ticket.find({ asset_name: userskill, accepted_by: null, ticket_type: 'trouble' }).populate('asset_name', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
             if (typeof filteredTicket !== 'undefined') {
                 /**
                  * we used spread operator (...) to push everything inside filteredTicket list to filteredTicketsList list

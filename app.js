@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const connection = require('./Config/db.connect')
 const cors = require('cors')
 require('dotenv').config({ path: './Config/.env' });
-const { agenda } = require('./Config/agendaconfig');
+const { agenda, init } = require('./Config/agendaconfig');
+init()
 var Agendash = require("agendash");
 // initialize express
 const app = express();
