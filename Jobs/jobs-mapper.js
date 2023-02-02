@@ -24,7 +24,6 @@ const ticket_schedular = async (agenda) => {
 
         // name of the job
         key = "ticket " + Math.floor(Math.random() * Math.floor(Math.random() * Date.now()))
-
         agenda.define(key, async (job, done) => {
             
             // let ticket_id = job.attrs.ticket_id
@@ -43,26 +42,15 @@ const ticket_schedular = async (agenda) => {
                 location: oldticket.location
             }
 
-            console.log(body)
             // convert any upper case letters to lower before sending to database
             body = utils.lowercasedata(body)
 
             const newTicket = new Ticket(body)
             let sendTicket = await newTicket.save()
-            
-            console.log(sendTicket)
             done();
         })
 
         await agenda.every(lastscheduleticket.schedule_time, key, { oldticket: lastscheduleticket })
-
-        agenda.define("test job", (job, done) => {
-
-            console.log("test job")
-            done()
-        })
-
-        await agenda.every("20 seconds", "test job")
 
     }
 

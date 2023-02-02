@@ -145,35 +145,32 @@ const addRequesteeTicket = async (req, res) => {
 }
 
 // add schedular ticket
-const addSchedularTicket = async (req, res, asset_id, checklist, location) => {
+const addSchedularTicket = async (asset_id, scheduledata, checklistdata, locationdata) => {
     try {
 
-        // const username = req.valid.username  // data retrived from token
-        // const user = await findUser(username)
-
-        // // user.id of who created the ticket
-        // req.body.requestee_id = user._id
-
         // check previous assets schedule tickets and set status close if any open
-        await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
+        // await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
 
-        // monthly maintenance suject
-        req.body = {
-            subject: 'asset maintenance',
-            description: 'regular maintenance',
-            checklist: checklist,
+        // monthly maintenance subject
+        body = {
+            subject: 'schedule maintenance',
+            description: 'schedule maintenance of asset ' + asset_id,
+            schedule_time: scheduledata,
+            checklist: checklistdata,
             asset_name: asset_id,
-            location: location
+            location: locationdata
         }
 
         // convert any upper case letters to lower before sending to database
-        req.body = utils.lowercasedata(req.body)
+        body = utils.lowercasedata(body)
 
-        const newTicket = new Ticket(req.body)
+        const newTicket = new Ticket(body)
+
+        // call adenda init() after save
         let sendTicket = await newTicket.save()
-        if (!sendTicket) return sendTicket
-        if (sendTicket) return sendTicket
 
+        if (!sendTicket) return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
+        if (sendTicket) return { "tstatus": 200, "tresult": sendTicket }
 
     } catch (error) {
         return new Error({ error: error })
@@ -236,20 +233,20 @@ const deleteRequesteeTicket = async (req, res) => {
 
 const getAssetLocation = async (req, res) => {
     try {
-        
+
         // send only floor and rooms data of specific building
-        if(req.query.building_no){
-            const floorandrooms = await Location.find({unit_or_building: req.query.building_no}).select('subdivision').populate('subdivision.rooms.assets', 'asset_name')
+        if (req.query.building_no) {
+            const floorandrooms = await Location.find({ unit_or_building: req.query.building_no }).select('subdivision').populate('subdivision.rooms.assets', 'asset_name')
             return res.status(200).json(floorandrooms)
         }
 
         // send only building names
         const buildings = await Location.find({}).select('unit_or_building')
-        return res.status(200).json({buildings: buildings})
+        return res.status(200).json({ buildings: buildings })
 
-        
+
     } catch (error) {
-        return new Error({error:error})
+        return new Error({ error: error })
     }
 }
 

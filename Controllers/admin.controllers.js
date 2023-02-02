@@ -6,11 +6,13 @@ const { Schedular } = require('../Models/schedular.model')
 const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
 const { addSchedularTicket } = require('../Controllers/ticket.controllers')
-const { schedular } = require('../Jobs/ticket-schedular')
 const { crongen } = require('../Utils/crongen.utils')
+const { ticket_schedular } = require('../Jobs/jobs-mapper')
 const utils = require('../Utils/common.utils')
 const bcrypt = require('bcrypt');
-
+require('dotenv').config({ path: '../Congif/.env' });
+let MongoClient = require("mongodb").MongoClient;
+// const {init} = require('../config/agendaconfig')
 //////////////////////////////////////////////////// User Section ////////////////////////////////////////////////////
 
 // get all users 
@@ -634,21 +636,28 @@ const getSchedular = async (req, res) => {
         // pagination parameters
         const { page = 1, limit = 9 } = req.query
 
-        if (req.query.asset_category) {
-            const schedular = await Schedular.find({ asset_category: req.query.asset_category }).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
-            const total = schedular.length;
+        // if (req.query.asset_category) {
+        //     const schedular = await db.collection('agendaJobs').find({ asset_category: req.query.asset_category }).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
+        //     const total = schedular.length;
 
-            if (total == 0) return res.status(404).json({ msg: "no schedules found" })
+        //     if (total == 0) return res.status(404).json({ msg: "no schedules found" })
 
-            res.status(200).json({ Schedules: schedular, total: total })
-        }
+        //     res.status(200).json({ Schedules: schedular, total: total })
+        // }
 
-        const schedular = await Schedular.find({}).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
-        const total = schedular.length;
+        let client = new MongoClient(process.env.DB_CONNECTION)
+        let db = client.db('test')
+        // console.log(db.collection('agendaJobs').find())
+        db.collection('agendaJobs').find({}, { limit: (limit * 1), skip: ((page - 1) * limit) }).toArray((err, result) => {
+            if (!err) {
+                res.status(200).json({ Schedules: result, total: result.length })
+            }
+            if (err) {
+                res.status(500).json({ msg: "An Error occured. please try again" })
+            }
+            if (result.length == 0) return res.status(404).json({ msg: "no schedules found" })
+        })
 
-        if (total == 0) return res.status(404).json({ msg: "no schedules found" })
-
-        res.status(200).json({ Schedules: schedular, total: total })
     } catch (error) {
         return new Error(error)
     }
@@ -674,7 +683,6 @@ const getOneSchedule = async (req, res) => {
 // add schedular
 const addSchedular = async (req, res) => {
     try {
-
         if (req.body.asset_id) {
             let assetdata = req.body.asset_id
             const checklistexists = await checklist.findOne({ checklist_name: { $regex: req.body.checklist_selection } })
@@ -682,17 +690,17 @@ const addSchedular = async (req, res) => {
                 if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_date && req.body.start_time && req.body.location) {
 
                     // concatinates client given info into cron (eg weekly on monday at 10:00)
-                    let schedule = crongen(req.body.schedular,req.body.day,req.body.start_date,req.body.start_time)
-                    
+                    let schedule = crongen(req.body.schedular, req.body.day, req.body.start_date, req.body.start_time)
+
                     // sending data to create ticket as per the following schedule
-                    const {tstatus, tresult} = await schedular(assetdata, schedule, checklistexists, req.body.location)
+                    const { tstatus, tresult } = await addSchedularTicket(assetdata, schedule, checklistexists, req.body.location)
 
-                    console.log(tstatus)
-                    if(tstatus == 200){
-
+                    if (tstatus == 200) {
                         // data will be saved in the agenda 
+                        // init()
+
                         return res.status(201).json({ msg: "data saved successfully" })
-                    }else{
+                    } else {
                         return res.status(500).json({ msg: "error while creating ticket. try again!" })
 
                     }

@@ -1,4 +1,4 @@
-const {ticket_schedular} = require('./jobs-mapper')
+const { ticket_schedular } = require('./jobs-mapper')
 
 const jobsMapper = [ticket_schedular]
 

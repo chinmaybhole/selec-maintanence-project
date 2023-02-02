@@ -24,7 +24,7 @@ agenda.on('ready', () => console.log("agenda ready"))
 agenda.on('error', (err) => console.log(err))
 
 // initalized a job function which will define and process the job for respective tasks 
-initializeJob(agenda)
+// initializeJob(agenda)
 
 // init() will start the agenda process if we get success on above procedures
 async function init() {
