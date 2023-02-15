@@ -4,6 +4,7 @@ const { Asset } = require('../Models/assets.model')
 const { checklist } = require('../Models/checklist.model')
 const { Location } = require('../Models/location.model')
 const utils = require('../Utils/common.utils')
+const { init } = require('../config/agendaconfig');
 
 // TODO Create 2 seprate tickets Trouble ticket and Schedular Ticket
 
@@ -12,6 +13,8 @@ const utils = require('../Utils/common.utils')
 // get tickets
 const getTickets = async (req, res) => {
     try {
+        const { page = 1, limit = 9 } = req.query
+
         if (req.query.subject) {
             const ticket = await Ticket.find({ subject: { $regex: req.query.subject } }).populate("asset_name").exec()
             if (!ticket) return res.status(404).json({ msg: "no tickets found" })
@@ -19,7 +22,7 @@ const getTickets = async (req, res) => {
         }
 
         if (req.query.requestee_id) {
-            const ticket = await Ticket.find({ requestee_id: req.query.requestee_id }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ requestee_id: req.query.requestee_id }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ tickets: ticket, totalcount: total })
@@ -27,18 +30,18 @@ const getTickets = async (req, res) => {
         }
 
         if (req.query.status) {
-            const ticket = await Ticket.find({ status: { $regex: req.query.status } }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ status: { $regex: req.query.status } }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ tickets: ticket, totalcount: total })
         }
 
         if (req.query.requestee_id && req.query.subject) {
-            const ticket = await Ticket.find({ requestee_id: requestee_id, subject: { $regex: req.query.subject } }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ requestee_id: requestee_id, subject: { $regex: req.query.subject } }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             if (!ticket) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ ticket: ticket })
         }
-        const tickets = await Ticket.find({}).populate("asset_name").exec()
+        const tickets = await Ticket.find({}).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
         const total = tickets.length
         if (total === 0) return res.status(404).json({ msg: "no tickets found" })
 
@@ -167,10 +170,19 @@ const addSchedularTicket = async (asset_id, scheduledata, checklistdata, locatio
         const newTicket = new Ticket(body)
 
         // call adenda init() after save
-        let sendTicket = await newTicket.save()
+        newTicket.save((err, result) => {
+            if (!result) {
+                return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
+            }
+            if (result) {
+                // init() save data to agendajobs db
+                return { "tstatus": 200, "tresult": "sent successfully" }
 
-        if (!sendTicket) return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
-        if (sendTicket) return { "tstatus": 200, "tresult": sendTicket }
+            }
+        })
+
+        // if (!sendTicket) return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
+        // if (sendTicket) return { "tstatus": 200, "tresult": sendTicket }
 
     } catch (error) {
         return new Error({ error: error })

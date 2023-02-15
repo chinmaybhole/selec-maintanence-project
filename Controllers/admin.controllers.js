@@ -7,12 +7,10 @@ const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
 const { addSchedularTicket } = require('../Controllers/ticket.controllers')
 const { crongen } = require('../Utils/crongen.utils')
-const { ticket_schedular } = require('../Jobs/jobs-mapper')
 const utils = require('../Utils/common.utils')
 const bcrypt = require('bcrypt');
 require('dotenv').config({ path: '../Congif/.env' });
 let MongoClient = require("mongodb").MongoClient;
-// const {init} = require('../config/agendaconfig')
 //////////////////////////////////////////////////// User Section ////////////////////////////////////////////////////
 
 // get all users 
