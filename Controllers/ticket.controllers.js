@@ -4,7 +4,6 @@ const { Asset } = require('../Models/assets.model')
 const { checklist } = require('../Models/checklist.model')
 const { Location } = require('../Models/location.model')
 const utils = require('../Utils/common.utils')
-const { init } = require('../config/agendaconfig');
 
 // TODO Create 2 seprate tickets Trouble ticket and Schedular Ticket
 
@@ -168,18 +167,19 @@ const addSchedularTicket = async (asset_id, scheduledata, checklistdata, locatio
         body = utils.lowercasedata(body)
 
         const newTicket = new Ticket(body)
+        let tstatus = 0
 
-        // call adenda init() after save
-        newTicket.save((err, result) => {
-            if (!result) {
-                return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
-            }
-            if (result) {
-                // init() save data to agendajobs db
-                return { "tstatus": 200, "tresult": "sent successfully" }
-
-            }
-        })
+        // call adenda init after save
+        const result = newTicket.save()
+        
+        if (!result) {
+            tstatus = 500
+            return tstatus
+        }
+        else if (result) {
+            tstatus = 200
+            return tstatus
+        }
 
         // if (!sendTicket) return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
         // if (sendTicket) return { "tstatus": 200, "tresult": sendTicket }

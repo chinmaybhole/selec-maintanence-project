@@ -691,11 +691,9 @@ const addSchedular = async (req, res) => {
                     let schedule = crongen(req.body.schedular, req.body.day, req.body.start_date, req.body.start_time)
 
                     // sending data to create ticket as per the following schedule
-                    const { tstatus, tresult } = await addSchedularTicket(assetdata, schedule, checklistexists, req.body.location)
-
+                    const tstatus = await addSchedularTicket(assetdata, schedule, checklistexists, req.body.location)
+                    
                     if (tstatus == 200) {
-                        // data will be saved in the agenda 
-                        // init()
 
                         return res.status(201).json({ msg: "data saved successfully" })
                     } else {
@@ -737,6 +735,7 @@ const deleteSchedular = async (req, res) => {
 // add location
 const addLocation = async (req, res) => {
     try {
+        // TODO add duplication check
         if (req.body.subdivision) {
             let subdivisions = req.body.subdivision
             if (subdivisions.length >= 2) {

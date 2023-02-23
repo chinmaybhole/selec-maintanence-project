@@ -32,8 +32,10 @@ const ticket_schedular = async (agenda) => {
             // await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
             // oldscheduleticket = await Ticket.find({ _id: ticket_id })
             // oldscheduleticket = oldscheduleticket[0]
+
             // monthly maintenance subject
             let { oldticket } = job.attrs.data
+            console.log(oldticket)
 
             body = {
                 subject: 'schedule maintenance',
@@ -53,26 +55,20 @@ const ticket_schedular = async (agenda) => {
         })
 
         await agenda.every(lastscheduleticket.schedule_time, key, { oldticket: lastscheduleticket })
-
     }
-
 
 }
 
 const schedular_trigger = async (agenda) => {
     try {
-
-        agenda.define("schedular_trigger", async (job, done, agenda) => {
+        agenda.define("schedular_trigger", async (job, done) => {
             // check weather any tickets with schedule tag is present with current system date -1
-
             // getting current system datetime
             let currentsystemdatetime = new Date();
             // yesterday datetime
             let yesterdaydatetime = currentsystemdatetime.setDate(currentsystemdatetime.getDate() - 1)
-
             // list of unschedule tickets
             const unscheduledtickets = await Ticket.find({ ticket_type: 'schedule', createdAt: { $gte: yesterdaydatetime, $lt: currentsystemdatetime } })
-
             // scheduling each unschedule ticket
             for (let i in unscheduledtickets) {
                 // name of the job
@@ -81,7 +77,6 @@ const schedular_trigger = async (agenda) => {
                 agenda.define(key, async (job, done) => {
                     // getting data from agenda's data object
                     let { oldticket } = job.attrs.data
-
                     body = {
                         subject: 'schedule maintenance',
                         description: 'schedule maintenance of asset ' + oldticket.asset_name,
@@ -90,7 +85,6 @@ const schedular_trigger = async (agenda) => {
                         asset_name: oldticket.asset_name,
                         location: oldticket.location
                     }
-
                     // convert any upper case letters to lower before sending to database
                     body = utils.lowercasedata(body)
 
@@ -98,17 +92,14 @@ const schedular_trigger = async (agenda) => {
                     let sendTicket = await newTicket.save()
                     done();
                 })
-
                 await agenda.every(unscheduledtickets[i].schedule_time, key, { oldticket: unscheduledtickets[i] })
             }
-
-
+            done()
         })
-
         await agenda.every("0 0 * * *", "schedular_trigger")
     } catch (error) {
         throw Error({ "error": error })
     }
 }
 
-module.exports = { ticket_schedular }
+module.exports = { ticket_schedular, schedular_trigger }
