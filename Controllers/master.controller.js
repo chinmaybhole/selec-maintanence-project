@@ -2,6 +2,16 @@ const mongoose = require("mongoose");
 const { addTemp } = require("../Models/addtemplate.model.js");
 
 const add_asset_templates = async (req, res) => {
+  `
+    API Body sample:
+    {
+        "template_name":"phone",
+        "model":"String",
+        "price":"Number"
+        
+    
+    }`;
+
   try {
     const schema = req.body;
     let name = req.body.template_name;
@@ -25,9 +35,9 @@ const add_asset_templates = async (req, res) => {
 };
 
 const add_asset = (req, res) => {
+  "Testing in progress";
   try {
     const body = req.body;
-    let newSchema = mongoose.model("phoneTemp");
     res.status(200).send(newSchema);
   } catch (err) {
     console.log(err);
