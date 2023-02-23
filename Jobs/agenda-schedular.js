@@ -1,22 +1,27 @@
-const jobsMapper = require('./jobs-mapper')
+const { ticket_schedular } = require('./jobs-mapper')
+
+const jobsMapper = [ticket_schedular]
 
 // initalizing agenda jobs
 async function initializeJob(agenda) {
 
     // mapping each key from jobs mapper 
-    Object.keys(jobsMapper).forEach(async key => {
+    // Object.keys(jobsMapper).forEach(async key => {
 
-        // define requires name of the define function, and a callback function
-        agenda.define(key, (job, done) => {
+    //     // define requires name of the define function, and a callback function
+    //     agenda.define(key, (job, done) => {
 
-            // mapping the handler of that respective key
-            jobsMapper[key].handler()            
-            done();
-        })
+    //         // mapping the handler of that respective key
+    //         jobsMapper[key].handler()
+    //         done();
+    //     })
 
-        // providing details of type of process (for eg every,now), when the process should be repeated and name of the defined function
-        await agenda[jobsMapper[key].type](jobsMapper[key].time, key);
-    })
+    //     // providing details of type of process (for eg every,now), when the process should be repeated and 
+    //     // name of the defined function
+    //     await agenda[jobsMapper[key].type](jobsMapper[key].time, key,jobsMapper[key].data);
+    // })
+
+    jobsMapper.forEach(async (job) => job(agenda))
 
 }
 

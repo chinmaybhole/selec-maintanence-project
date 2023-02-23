@@ -41,6 +41,9 @@ routers.post('/add_assets', checkAuth, checkRole(config.ROLE.ADMIN), adminContro
 // Delete asset
 routers.delete('/delete_asset/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.deleteAsset)
 
+// add multiple assets
+routers.post('/addMultipleAsset',checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.addMultipleAsset)
+
 //////////////////////////////////////////////////// Asset Category Section //////////////////////////////////////////
 
 // Add asset category
@@ -72,19 +75,19 @@ routers.put('/update_machineData/:id', checkAuth, checkRole(config.ROLE.ADMIN), 
 //////////////////////////////////////////////////// Schedular Section ///////////////////////////////////////////////
 
 // get schedular
-routers.get('/schedular', adminControllers.getSchedular)
+routers.get('/schedular', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.getSchedular)
 
 // get one schedule
-routers.get('/scheular/:id', adminControllers.getOneSchedule)
+routers.get('/scheular/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.getOneSchedule)
 
 // add schedular
-routers.post('/add_schedular', adminControllers.addSchedular)
+routers.post('/add_schedular', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.addSchedular)
 
 // update schedular
-routers.put('/update_schedular/:id', adminControllers.updateSchedular)
+routers.put('/update_schedular/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.updateSchedular)
 
 // delete schedular
-routers.delete('/delete_schedular/:id', adminControllers.deleteSchedular)
+routers.delete('/delete_schedular/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.deleteSchedular)
 
 //////////////////////////////////////////////////// Location Section ////////////////////////////////////////////////
 
@@ -99,6 +102,9 @@ routers.put('/update_location/:id', checkAuth, checkRole(config.ROLE.ADMIN), adm
 
 // delete location
 routers.delete('/delete_location/:id', checkAuth, checkRole(config.ROLE.ADMIN), adminControllers.deleteLocation)
+
+// get ticket location
+routers.get("/getAssetLocation", checkAuth, checkRole(config.ROLE.ADMIN), TicketControllers.getAssetLocation)
 
 //////////////////////////////////////////////////// Ticket Section ///////////////////////////////////////////////
 

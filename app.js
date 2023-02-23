@@ -1,17 +1,11 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const connection = require("./Config/db.connect");
-const cors = require("cors");
-require("dotenv").config({ path: "./Config/.env" });
-const { init, agenda } = require("./Config/agendaconfig");
 
-// Dynamic schema json to mongoose schema
-const generateSchema = require("generate-schema");
-
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
-// init();
+const express = require('express');
+const bodyParser = require('body-parser');
+const connection = require('./Config/db.connect')
+const cors = require('cors')
+require('dotenv').config({ path: './Config/.env' });
+const { agenda, init } = require('./Config/agendaconfig');
+// init()
 var Agendash = require("agendash");
 // initialize express
 const app = express();
@@ -124,7 +118,9 @@ app.use("*", (req, res) => {
 });
 
 // app connection
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Cors-enable Server running on http://localhost:${PORT}`);
 });
+

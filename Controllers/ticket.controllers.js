@@ -12,6 +12,8 @@ const utils = require('../Utils/common.utils')
 // get tickets
 const getTickets = async (req, res) => {
     try {
+        const { page = 1, limit = 9 } = req.query
+
         if (req.query.subject) {
             const ticket = await Ticket.find({ subject: { $regex: req.query.subject } }).populate("asset_name").exec()
             if (!ticket) return res.status(404).json({ msg: "no tickets found" })
@@ -19,7 +21,7 @@ const getTickets = async (req, res) => {
         }
 
         if (req.query.requestee_id) {
-            const ticket = await Ticket.find({ requestee_id: req.query.requestee_id }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ requestee_id: req.query.requestee_id }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ tickets: ticket, totalcount: total })
@@ -27,18 +29,18 @@ const getTickets = async (req, res) => {
         }
 
         if (req.query.status) {
-            const ticket = await Ticket.find({ status: { $regex: req.query.status } }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ status: { $regex: req.query.status } }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             const total = ticket.length
             if (total === 0) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ tickets: ticket, totalcount: total })
         }
 
         if (req.query.requestee_id && req.query.subject) {
-            const ticket = await Ticket.find({ requestee_id: requestee_id, subject: { $regex: req.query.subject } }).populate("asset_name").exec()
+            const ticket = await Ticket.find({ requestee_id: requestee_id, subject: { $regex: req.query.subject } }).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
             if (!ticket) return res.status(404).json({ msg: "no tickets found" })
             return res.status(200).json({ ticket: ticket })
         }
-        const tickets = await Ticket.find({}).populate("asset_name").exec()
+        const tickets = await Ticket.find({}).populate("asset_name").limit(limit * 1).skip((page - 1) * limit).exec()
         const total = tickets.length
         if (total === 0) return res.status(404).json({ msg: "no tickets found" })
 
@@ -115,7 +117,7 @@ const getRequesteeOneTicket = async (req, res) => {
 // add ticket
 const addRequesteeTicket = async (req, res) => {
     try {
-        
+
         const username = req.valid.username  // data retrived from token
         const user = await findUser(username)
 
@@ -129,16 +131,59 @@ const addRequesteeTicket = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newTicket = new Ticket(req.body)
-        newTicket.save((err,result)=>{
-            if(err){
+        newTicket.save((err, result) => {
+            if (err) {
                 console.log(err)
                 return res.status(501).json({ msg: "unable to create ticket, try again" })
             }
-            if(!err){
+            if (!err) {
                 return res.status(201).json({ msg: "ticket created successfully" })
             }
         })
+
+    } catch (error) {
+        return new Error({ error: error })
+    }
+}
+
+// add schedular ticket
+const addSchedularTicket = async (asset_id, scheduledata, checklistdata, locationdata) => {
+    try {
+
+        // check previous assets schedule tickets and set status close if any open
+        // await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
+
+        // monthly maintenance subject
+        body = {
+            subject: 'schedule maintenance',
+            description: 'schedule maintenance of asset ' + asset_id,
+            schedule_time: scheduledata,
+            checklist: checklistdata,
+            asset_name: asset_id,
+            location: locationdata
+        }
+
+        // convert any upper case letters to lower before sending to database
+        body = utils.lowercasedata(body)
+
+        const newTicket = new Ticket(body)
+        let tstatus = 0
+
+        // call adenda init after save
+        const result = newTicket.save()
         
+        if (!result) {
+            tstatus = 500
+            return tstatus
+        }
+        else if (result) {
+            tstatus = 200
+            return tstatus
+        }
+
+        // if (!sendTicket) return { "tstatus": 500, "tresult": "Error while saving ticket, try again" }
+        // if (sendTicket) return { "tstatus": 200, "tresult": sendTicket }
+
     } catch (error) {
         return new Error({ error: error })
     }
@@ -198,4 +243,23 @@ const deleteRequesteeTicket = async (req, res) => {
     }
 }
 
-module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket }
+const getAssetLocation = async (req, res) => {
+    try {
+
+        // send only floor and rooms data of specific building
+        if (req.query.building_no) {
+            const floorandrooms = await Location.find({ unit_or_building: req.query.building_no }).select('subdivision').populate('subdivision.rooms.assets', 'asset_name')
+            return res.status(200).json(floorandrooms)
+        }
+
+        // send only building names
+        const buildings = await Location.find({}).select('unit_or_building')
+        return res.status(200).json({ buildings: buildings })
+
+
+    } catch (error) {
+        return new Error({ error: error })
+    }
+}
+
+module.exports = { getTickets, getOneTicket, updatestatusTicket, getRequesteeTickets, getRequesteeOneTicket, addRequesteeTicket, updateRequesteeTicket, updatestatusRequesteeTicket, deleteRequesteeTicket, addSchedularTicket, getAssetLocation }

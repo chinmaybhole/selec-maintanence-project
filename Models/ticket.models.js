@@ -91,16 +91,16 @@ const ticket = Schema({
     ticket_type: {
         type: String,
         required: true,
-        default: "schdule"
+        default: "schedule"
     },
     asset_name: {
         type: Schema.Types.ObjectId,
         ref: "assetData",
         required: true
     },
-    accepted: {
-        type: Boolean,
-        default: false
+    schedule_time:{
+        type: String,
+        default: null
     },
     accepted_by: {
         type: Schema.Types.ObjectId,
@@ -115,7 +115,7 @@ const ticket = Schema({
         type: Schema.Types.ObjectId,
         ref: 'checkList'
     }
-})
+}, { timestamps: true })
 
 ticket.pre('deleteOne', { document: false, query: true }, async function (next) {
     const doc = await this.model.findOne(this.getFilter())
@@ -125,4 +125,4 @@ ticket.pre('deleteOne', { document: false, query: true }, async function (next) 
     next()
 })
 
-module.exports = { Ticket: mongoose.model("ticket", ticket) }
+module.exports = { Ticket: mongoose.model("ticket", ticket), locationdata }

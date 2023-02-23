@@ -60,7 +60,7 @@ const ticketDisplay = async (req, res) => {
         let filteredTicketsList = []
         for (let i in userskills) {
             let userskill = userskills[i].toString()
-            const filteredTicket = await Ticket.find({ asset_name: userskill, accepted_by: null, accepted: false, ticket_type: 'trouble' }).populate('asset_name', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
+            const filteredTicket = await Ticket.find({ asset_name: userskill, accepted_by: null, ticket_type: 'trouble' }).populate('asset_name', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
             if (typeof filteredTicket !== 'undefined') {
                 /**
                  * we used spread operator (...) to push everything inside filteredTicket list to filteredTicketsList list
@@ -118,23 +118,4 @@ const ticketAccept = async (req, res) => {
     }
 }
 
-const getLocation = async (req, res) => {
-    try {
-        
-        // send only floor and rooms data of specific building
-        if(req.query.building_no){
-            const floorandrooms = await Location.find({unit_or_building: req.query.building_no}).select('subdivision').populate('subdivision.rooms.assets', 'model_name')
-            return res.status(200).json({floorandrooms: floorandrooms})
-        }
-
-        // send only building names
-        const buildings = await Location.find({}).select('unit_or_building')
-        return res.status(200).json({buildings: buildings})
-
-        
-    } catch (error) {
-        return new Error({error:error})
-    }
-}
-
-module.exports = { workOrder, ticketAccept, ticketDisplay, imageUpload, getLocation }
+module.exports = { workOrder, ticketAccept, ticketDisplay, imageUpload }

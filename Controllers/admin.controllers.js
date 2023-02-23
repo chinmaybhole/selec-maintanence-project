@@ -5,10 +5,12 @@ const { Location } = require('../Models/location.model')
 const { Schedular } = require('../Models/schedular.model')
 const { checklist, tasklist } = require('../Models/checklist.model')
 const { getLength, checkReduncancy } = require('../Helper/admin.helper')
+const { addSchedularTicket } = require('../Controllers/ticket.controllers')
+const { crongen } = require('../Utils/crongen.utils')
 const utils = require('../Utils/common.utils')
-
 const bcrypt = require('bcrypt');
-
+require('dotenv').config({ path: '../Congif/.env' });
+let MongoClient = require("mongodb").MongoClient;
 //////////////////////////////////////////////////// User Section ////////////////////////////////////////////////////
 
 // get all users 
@@ -93,17 +95,16 @@ const addUser = async (req, res) => {
         const saltRounds = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(newUser.password, saltRounds)
 
-        newUser.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "user created successfully"});
+        newUser.save(async (err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "user created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
-        res.status(201).json({msg: "user created successfully"});
     } catch (error) {
-        res.json({ message: error.message });
+        res.json({ err: error });
     }
 }
 
@@ -220,12 +221,12 @@ const updateUser = async (req, res) => {
             // convert any upper case letters to lower before sending to database
             req.body = utils.lowercasedata(req.body)
 
-            const up = await updateuser.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "user updated successfully"});
+            const up = await updateuser.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "user updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             });
         }
@@ -267,13 +268,13 @@ const addRole = async (req, res) => {
         // convert any upper case letters to lower before sending to database
         req.body = utils.lowercasedata(req.body)
 
-        const newRole = new Role(req.body)       
-        newRole.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "role created successfully"});
+        const newRole = new Role(req.body)
+        newRole.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "role created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         });
     } catch (error) {
@@ -337,12 +338,43 @@ const addAsset = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newAasset = new Asset(req.body)
-        newAasset.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "asset created successfully"});
+        newAasset.save(async (err, result) => {
+            if (!err) {
+
+                const updatelocation = await Location.findOneAndUpdate({
+                    // elemMatch matches the given value within the provided key inside the document
+                    "subdivision": { "$elemMatch": { room: req.body.asset_location.room } },
+                    unit_or_building: req.body.asset_location.unit_building,
+                }, {
+                    $push: {
+                        // values added dynamically to $ from arrayFilters
+                        "subdivision.$[outer].rooms.$[inner].assets": result
+                    }
+                }, {
+                    arrayFilters: [
+                        {
+                            "outer.floor": req.body.asset_location.floor
+                        },
+                        {
+                            "inner.room": req.body.asset_location.room
+                        }
+                    ],
+                    new: true
+                })
+
+                if (updatelocation) {
+                    updatelocation.save((err, result) => {
+                        if (!err) {
+                            return res.status(201).json({ msg: "asset added successfully" });
+                        }
+                        if (err) {
+                            return res.status(501).json({ msg: "an error occured while updating location, try again" });
+                        }
+                    })
+                }
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ err: err });
             }
         });
 
@@ -368,6 +400,24 @@ const deleteAsset = async (req, res) => {
     }
 }
 
+// add multiple asset
+const addMultipleAsset = async (req, res) => {
+    try {
+
+
+        Asset.insertMany([], (err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "assets added succssfully" })
+            }
+            if (err) {
+                return res.status(501).json({ err: "en error occured while adding assets, try again" })
+            }
+        })
+    } catch (error) {
+        res.status(501).json(new Error({ err: error }))
+    }
+}
+
 //////////////////////////////////////////////////// Asset Category Section //////////////////////////////////////////
 
 // add asset category
@@ -387,12 +437,12 @@ const addAssetCategory = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const addassetcategory = new assetsconfig(req.body)
-        addassetcategory.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "category created successfully"});
+        addassetcategory.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "category created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -462,15 +512,15 @@ const updateAssetCategory = async (req, res) => {
                 // convert any upper case letters to lower before sending to database
                 req.body = utils.lowercasedata(req.body)
 
-                updateassetcategory.save((err,result)=>{
-                    if(!err){
-                        return res.status(200).json({msg: "category updated successfully"});
+                updateassetcategory.save((err, result) => {
+                    if (!err) {
+                        return res.status(200).json({ msg: "category updated successfully" });
                     }
-                    if(err){
-                        return res.status(501).json({msg: "an error occured, try again"});
+                    if (err) {
+                        return res.status(501).json({ msg: "an error occured, try again" });
                     }
                 });
-                
+
             }
             return res.status(422).json({ msg: "asset list already exits" })
         }
@@ -507,12 +557,12 @@ const addMachine = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newmachine = new machinedata(req.body)
-        newmachine.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "machine created successfully"});
+        newmachine.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "machine created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -561,12 +611,12 @@ const updateMachine = async (req, res) => {
             req.body = utils.lowercasedata(req.body)
 
             const machineupdate = await machinedata.findByIdAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true })
-            machineupdate.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "machine updated successfully"});
+            machineupdate.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "machine updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             })
         }
@@ -584,21 +634,28 @@ const getSchedular = async (req, res) => {
         // pagination parameters
         const { page = 1, limit = 9 } = req.query
 
-        if (req.query.asset_category) {
-            const schedular = await Schedular.find({ asset_category: req.query.asset_category }).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
-            const total = schedular.length;
+        // if (req.query.asset_category) {
+        //     const schedular = await db.collection('agendaJobs').find({ asset_category: req.query.asset_category }).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
+        //     const total = schedular.length;
 
-            if (total == 0) return res.status(404).json({ msg: "no schedules found" })
+        //     if (total == 0) return res.status(404).json({ msg: "no schedules found" })
 
-            res.status(200).json({ Schedules: schedular, total: total })
-        }
+        //     res.status(200).json({ Schedules: schedular, total: total })
+        // }
 
-        const schedular = await Schedular.find({}).populate('asset_name', 'model_name').populate('checklist_selection', 'checklist_name').limit(limit * 1).skip((page - 1) * limit).exec();
-        const total = schedular.length;
+        let client = new MongoClient(process.env.DB_CONNECTION)
+        let db = client.db('test')
+        // console.log(db.collection('agendaJobs').find())
+        db.collection('agendaJobs').find({}, { limit: (limit * 1), skip: ((page - 1) * limit) }).toArray((err, result) => {
+            if (!err) {
+                res.status(200).json({ Schedules: result, total: result.length })
+            }
+            if (err) {
+                res.status(500).json({ msg: "An Error occured. please try again" })
+            }
+            if (result.length == 0) return res.status(404).json({ msg: "no schedules found" })
+        })
 
-        if (total == 0) return res.status(404).json({ msg: "no schedules found" })
-
-        res.status(200).json({ Schedules: schedular, total: total })
     } catch (error) {
         return new Error(error)
     }
@@ -624,33 +681,31 @@ const getOneSchedule = async (req, res) => {
 // add schedular
 const addSchedular = async (req, res) => {
     try {
-
-        if (req.body.ticket_selection ) {
-            const checklistexists = await Ticket.find({ asset_name: req.body.ticket_selection })
+        if (req.body.asset_id) {
+            let assetdata = req.body.asset_id
+            const checklistexists = await checklist.findOne({ checklist_name: { $regex: req.body.checklist_selection } })
             if (checklistexists) {
-                req.body.asset_name = checklistexists[0].machine_name
-                req.body.checklist_selection = checklistexists[0]
-                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_time) {
+                if (req.body.maintainence_type && req.body.schedular && req.body.day && req.body.start_date && req.body.start_time && req.body.location) {
 
-                    console.log(req.body)
-                    const newSchedule = new Schedular(req.body)
-                    newSchedule.save((err, result) => {
-                        if (!err) {
+                    // concatinates client given info into cron (eg weekly on monday at 10:00)
+                    let schedule = crongen(req.body.schedular, req.body.day, req.body.start_date, req.body.start_time)
 
-                            return res.status(201).json({ msg: "data saved successfully" })
-                        }
+                    // sending data to create ticket as per the following schedule
+                    const tstatus = await addSchedularTicket(assetdata, schedule, checklistexists, req.body.location)
+                    
+                    if (tstatus == 200) {
 
-                        if (err) {
-                            console.log(err)
-                            return res.status(400).json({ error: err })
-                        }
-                    })
+                        return res.status(201).json({ msg: "data saved successfully" })
+                    } else {
+                        return res.status(500).json({ msg: "error while creating ticket. try again!" })
 
-                } else return res.status(400).json({ msg: "must include all maintainence/schedular parameters " })
+                    }
+
+                } else return res.status(400).json({ msg: "must include all maintainence/schedular parameters" })
 
             } else return res.status(404).json({ msg: "checklist not found" })
 
-        } else return res.status(400).json({ msg: "must include checklist " })
+        } else return res.status(400).json({ msg: "must include asset data" })
 
     } catch (error) {
         return new Error(error)
@@ -680,6 +735,7 @@ const deleteSchedular = async (req, res) => {
 // add location
 const addLocation = async (req, res) => {
     try {
+        // TODO add duplication check
         if (req.body.subdivision) {
             let subdivisions = req.body.subdivision
             if (subdivisions.length >= 2) {
@@ -730,12 +786,12 @@ const addLocation = async (req, res) => {
         req.body = utils.lowercasedata(req.body)
 
         const newLocation = new Location(req.body)
-        newLocation.save((err,result)=>{
-            if(!err){
-                return res.status(201).json({msg: "location created successfully"});
+        newLocation.save((err, result) => {
+            if (!err) {
+                return res.status(201).json({ msg: "location created successfully" });
             }
-            if(err){
-                return res.status(501).json({msg: "an error occured, try again"});
+            if (err) {
+                return res.status(501).json({ msg: "an error occured, try again" });
             }
         })
     } catch (error) {
@@ -770,7 +826,7 @@ const getLocation = async (req, res) => {
             }
         }
 
-        const getlocations = await Location.find({}).populate('subdivision.rooms.assets', 'model_name').limit(limit * 1).skip((page - 1) * limit).exec()
+        const getlocations = await Location.find({}).populate('subdivision.rooms.assets', 'asset_name').limit(limit * 1).skip((page - 1) * limit).exec()
         const totalcount = await Location.count({})
         if (totalcount === 0) return res.status(404).json({ message: "no locations found" })
         res.status(200).json({ locations: getlocations, total: totalcount })
@@ -784,7 +840,7 @@ const updateLocation = async (req, res) => {
     try {
         if (req.params.id) {
 
-            if (req.body.subdivision) { 
+            if (req.body.subdivision) {
                 let subdivisions = req.body.subdivision
 
                 if (subdivisions.length >= 2) {
@@ -835,12 +891,12 @@ const updateLocation = async (req, res) => {
             req.body = utils.lowercasedata(req.body)
 
             const updatelocation = await Location.findByIdAndUpdate({ _id: req.params.id }, { $push: req.body }, { new: true })
-            const updatedata = await updatelocation.save((err,result)=>{
-                if(!err){
-                    return res.status(200).json({msg: "location updated successfully"});
+            const updatedata = await updatelocation.save((err, result) => {
+                if (!err) {
+                    return res.status(200).json({ msg: "location updated successfully" });
                 }
-                if(err){
-                    return res.status(501).json({msg: "an error occured, try again"});
+                if (err) {
+                    return res.status(501).json({ msg: "an error occured, try again" });
                 }
             })
         }
@@ -1019,4 +1075,4 @@ const addChecklist = async (req, res) => {
         return new Error(error)
     }
 }
-module.exports = { getUsers, addUser, updateUser, deleteUser, addRole, getRoles, deleteRole, getAsset, addAsset, deleteAsset, addAssetCategory, getAssetCategory, deleteAssetCategory, updateAssetCategory, addMachine, getMachine, deleteMachine, updateMachine, getSchedular, getOneSchedule, addSchedular, updateSchedular, deleteSchedular, addLocation, getLocation, updateLocation, deleteLocation, getChecklist, getOneChecklist, addChecklist }
+module.exports = { getUsers, addUser, updateUser, deleteUser, addRole, getRoles, deleteRole, getAsset, addAsset, deleteAsset, addMultipleAsset, addAssetCategory, getAssetCategory, deleteAssetCategory, updateAssetCategory, addMachine, getMachine, deleteMachine, updateMachine, getSchedular, getOneSchedule, addSchedular, updateSchedular, deleteSchedular, addLocation, getLocation, updateLocation, deleteLocation, getChecklist, getOneChecklist, addChecklist }

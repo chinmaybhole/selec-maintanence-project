@@ -8,6 +8,7 @@ loginFile.txt
 
 # dotenv environment variable files
 .env
+.vscode
 
 # docker files
 .dockerignore
