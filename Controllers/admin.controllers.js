@@ -841,23 +841,22 @@ const addLocation = async (req, res) => {
                             and to avoid incomplete data or promise from map funtion we have used Promise.all() to get 
                             all the promised data first and then append it to mapdata variable 
                          */
-            if (typeof assets !== "undefined") {
-              let mapdata = await Promise.all(
-                assets.map(async (asset) => {
-                  let data = await machinedata.find({ model_name: asset });
-                  return data[0];
-                })
-              );
-              // replacing the original data with the mapped data
-              subdivisions[i].rooms[j].assets = mapdata;
-            }
-          }
-        }
-      } else {
-        let rooms = subdivisions[0].rooms;
-        for (let i in rooms) {
-          let assets = rooms[i].assets;
-          /**
+                        if (typeof assets !== 'undefined') {
+                            let mapdata = await Promise.all(assets.map(async (asset) => {
+                                let data = await Asset.find({ model_name: asset })
+                                return data[0]
+                            }))
+                            // replacing the original data with the mapped data
+                            subdivisions[i].rooms[j].assets = mapdata
+                        }
+                    }
+
+                }
+            } else {
+                let rooms = subdivisions[0].rooms
+                for (let i in rooms) {
+                    let assets = rooms[i].assets
+                    /**
                      *  Here we are passing list of assets to a map function to get the respective machine data
                         but to get machine data from database we need to apply async await to map function
                         and to avoid incomplete data or promise from map funtion we have used Promise.all() to get 
