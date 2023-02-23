@@ -19,9 +19,11 @@ function generateToken(username, role, interface) {
 //Validate JWT Token
 function validateToken(token) {
     let jwtSecretKey = config.Jwt.JWT_SECRET_KEY;
+    console.log("HELLOOO JWTTT")
     if (token) {
         try {
             const verified = jwt.verify(token, jwtSecretKey);
+            console.log(`Consoled Verified${verified}`)
             return verified;
 
         } catch (error) {
