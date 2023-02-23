@@ -4,6 +4,7 @@ const config = require('../Config/config.json')
 
 function checkRole(role) {
     return (req, res, next) => {
+        console.log(`Chinmay is Testing this code: ${req.valid}`)
         if (req.valid) {
             try {
                 let tokenRole = req.valid.role
@@ -40,6 +41,7 @@ async function findUser(username) {
 async function getLoginRole(user) {
     if (user) {
         let role = await Role.find({_id: user.role})
+        //TODO Test case user with multiple role 
         role = role[0]
 
         if (role.name === config.ROLE.REQUESTEE) return config.ROLE.REQUESTEE
@@ -56,6 +58,7 @@ async function getLoginRole(user) {
 function getInterface(user){
     try {
         if (user){
+            // TODO test case user with multiple interface
             let interface = user.interface
             if(interface === config.INTERFACE.APP) return config.INTERFACE.APP
             if(interface === config.INTERFACE.EMAIL) return config.INTERFACE.EMAIL

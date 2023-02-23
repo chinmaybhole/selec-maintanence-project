@@ -45,3 +45,10 @@ Content-Type: application/json
 ###
 GET  http://localhost:3000/admin/assets HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkR1bW15dXNlciIsInJvbGUiOnt9LCJpYXQiOjE2NjAwMzM0MTMsImV4cCI6MTY2MDAzMzg5M30.IT1QtaeQHhZRd0t3pJpgUXvt8TcthenghnO9a7TonAg
+
+###
+POST http://localhost:3000/master/add_assettemplates HTTP/1.1
+
+###
+GET http://localhost:3000/admin/ HTTP/1.1
+Authorization: Bearer yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkR1bW15dXNlciIsInJvbGUiOiJhZG1pbiIsImludGVyZmFjZSI6e30sImlhdCI6MTY3MjcyNTYyMiwiZXhwIjoxNjcyNzczNjIyfQ.vfxwrPCh_AxC2Ki_MEZHsichdBi37giJaswQqyUBQ6Q

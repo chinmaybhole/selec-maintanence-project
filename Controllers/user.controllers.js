@@ -6,9 +6,9 @@ const login = async(req, res) => {
     let username = req.body.username;
     let password = req.body.password;
     try {
-        let user = await findUser(username)
+        let user = await findUser(username) // Authentication 
         if (user) {
-            let role = await getLoginRole(user)
+            let role = await getLoginRole(user) // Authorisation
             const compare = await bcrypt.compare(password, user.password)
             if (compare) {
                 if (role !== null) {
