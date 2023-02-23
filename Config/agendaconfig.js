@@ -31,6 +31,8 @@ async function init() {
     await agenda.start();
 }
 
+setTimeout(init,3600000)
+
 module.exports = {
     init,
     agenda

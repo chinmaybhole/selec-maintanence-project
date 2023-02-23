@@ -4,7 +4,7 @@ const config = require('../Config/config.json')
 
 function checkRole(role) {
     return (req, res, next) => {
-        console.log(`Chinmay is Testing this code: ${req.valid}`)
+        
         if (req.valid) {
             try {
                 let tokenRole = req.valid.role
