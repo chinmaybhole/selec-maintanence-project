@@ -751,7 +751,7 @@ const addLocation = async (req, res) => {
                          */
                         if (typeof assets !== 'undefined') {
                             let mapdata = await Promise.all(assets.map(async (asset) => {
-                                let data = await machinedata.find({ model_name: asset })
+                                let data = await Asset.find({ model_name: asset })
                                 return data[0]
                             }))
                             // replacing the original data with the mapped data
