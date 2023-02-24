@@ -102,7 +102,7 @@ const ticket = Schema(
       required: true,
       default: "schedule",
     },
-    asset_name: {
+    asset_id: {
       type: Schema.Types.ObjectId,
       ref: "assetData",
       required: true,
