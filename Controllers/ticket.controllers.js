@@ -12,7 +12,7 @@ const utils = require("../Utils/common.utils");
 // get tickets
 const getTickets = async (req, res) => {
   try {
-    const { page = 1, limit = 9 } = req.query;
+    const { page = 1, limit = 150 } = req.query;
 
     if (req.query.subject) {
       const ticket = await Ticket.find({
