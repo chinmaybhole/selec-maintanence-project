@@ -118,6 +118,19 @@ const getRequesteeOneTicket = async (req, res) => {
 const addRequesteeTicket = async (req, res) => {
     try {
 
+        //TODO check asset exists??, does location/floor/room exists
+
+        if(!req.body.asset_name){
+            return res.status(400).json({msg:"asset field cannot be empty"})
+        }
+
+        if(!req.body.location){
+            return res.status(400).json({msg:"location field cannot be empty"})
+
+        }
+
+
+
         const username = req.valid.username  // data retrived from token
         const user = await findUser(username)
 
@@ -126,6 +139,9 @@ const addRequesteeTicket = async (req, res) => {
 
         // ticket type trouble because default = schedule
         req.body.ticket_type = 'trouble'
+
+        // check does asset exists
+
 
         // convert any upper case letters to lower before sending to database
         req.body = utils.lowercasedata(req.body)
@@ -249,6 +265,7 @@ const getAssetLocation = async (req, res) => {
         // send only floor and rooms data of specific building
         if (req.query.building_no) {
             const floorandrooms = await Location.find({ unit_or_building: req.query.building_no }).select('subdivision').populate('subdivision.rooms.assets', 'asset_name')
+            if (floorandrooms.length == 0) return res.status(404).json({msg: "invalid unit/buliding no"})
             return res.status(200).json(floorandrooms)
         }
 
