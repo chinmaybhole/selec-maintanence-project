@@ -18,12 +18,15 @@ routers.get('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.REQUESTEE), Ti
 routers.post('/add_ticket', checkAuth, checkRole(config.ROLE.REQUESTEE), TicketControllers.addRequesteeTicket)
 
 // update ticket
-routers.put('/ticket/:ticketid',TicketControllers.updateRequesteeTicket)
+routers.put('/ticket/:ticketid',checkAuth, checkRole(config.ROLE.REQUESTEE), TicketControllers.updateRequesteeTicket)
 
 // close ticket
-routers.patch('/ticket/:ticketid',TicketControllers.updatestatusRequesteeTicket)
+routers.patch('/ticket/:ticketid',checkAuth, checkRole(config.ROLE.REQUESTEE), TicketControllers.updatestatusRequesteeTicket)
 
 // delete ticket
-routers.delete('/ticket/:ticketid', TicketControllers.deleteRequesteeTicket)
+routers.delete('/ticket/:ticketid', checkAuth, checkRole(config.ROLE.REQUESTEE), TicketControllers.deleteRequesteeTicket)
+
+// get asset location
+routers.get('/getAssetLocation',checkAuth, checkRole(config.ROLE.REQUESTEE), TicketControllers.getAssetLocation)
 
 module.exports = routers
