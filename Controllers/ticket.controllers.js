@@ -155,10 +155,6 @@ const addRequesteeTicket = async (req, res) => {
       return res.status(400).json({ msg: "asset field cannot be empty" });
     }
 
-    if (!req.body.location) {
-      return res.status(400).json({ msg: "location field cannot be empty" });
-    }
-
     const username = req.valid.username; // data retrived from token
     const user = await findUser(username);
 
