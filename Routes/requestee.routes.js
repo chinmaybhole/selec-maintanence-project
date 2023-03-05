@@ -71,4 +71,10 @@ routers.get(
   requesteeControllers.getCurrentUser
 );
 
+routers.get(
+  "/location",
+  checkAuth,
+  checkRole(config.ROLE.REQUESTEE),
+  requesteeControllers.getLocation
+);
 module.exports = routers;
