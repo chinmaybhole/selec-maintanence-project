@@ -10,10 +10,7 @@ const csv = require("fast-csv");
 const multer = require("multer");
 const upload = multer({ dest: "tmp/csv/" });
 const fs = require("fs");
-const {
-  validateCsvData,
-  validateCsvRow,
-} = require("../Helper/master.helper.js");
+const { validateCsvData } = require("../Helper/master.helper.js");
 
 router = express.Router();
 
