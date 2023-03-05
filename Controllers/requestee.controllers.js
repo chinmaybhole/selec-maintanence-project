@@ -1,5 +1,6 @@
 //  Add Requestee Logic here
 const { findUser } = require("../Middleware/checkAuth.middleware");
+const { Location } = require("../Models/location.model");
 
 // Get Current User
 const getCurrentUser = async (req, res) => {
