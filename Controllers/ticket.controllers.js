@@ -18,7 +18,7 @@ const getTickets = async (req, res) => {
       const ticket = await Ticket.find({
         subject: { $regex: req.query.subject },
       })
-        .populate("asset_name")
+        .populate("asset_id")
         .exec();
       if (!ticket) return res.status(404).json({ msg: "no tickets found" });
       return res.status(200).json({ ticket: ticket });
@@ -26,7 +26,7 @@ const getTickets = async (req, res) => {
 
     if (req.query.requestee_id) {
       const ticket = await Ticket.find({ requestee_id: req.query.requestee_id })
-        .populate("asset_name")
+        .populate("asset_id")
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .exec();
@@ -37,7 +37,7 @@ const getTickets = async (req, res) => {
 
     if (req.query.status) {
       const ticket = await Ticket.find({ status: { $regex: req.query.status } })
-        .populate("asset_name")
+        .populate("asset_id")
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .exec();
@@ -51,7 +51,7 @@ const getTickets = async (req, res) => {
         requestee_id: requestee_id,
         subject: { $regex: req.query.subject },
       })
-        .populate("asset_name")
+        .populate("asset_id")
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .exec();
@@ -59,7 +59,7 @@ const getTickets = async (req, res) => {
       return res.status(200).json({ ticket: ticket });
     }
     const tickets = await Ticket.find({})
-      .populate("asset_name")
+      .populate("asset_id")
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
@@ -78,7 +78,7 @@ const getOneTicket = async (req, res) => {
     const ticketid = req.params.ticketid;
     if (ticketid != null) {
       const ticket = await Ticket.findOne({ _id: ticketid })
-        .populate("asset_name")
+        .populate("asset_id")
         .exec();
       if (!ticket) return res.status(404).json({ msg: "no tickets found" });
 
@@ -108,14 +108,14 @@ const getRequesteeTickets = async (req, res) => {
         requestee_id: userid,
         subject: { $regex: req.query.subject },
       })
-        .populate("asset_name")
+        .populate("asset_id")
         .exec();
       if (ticket.length === 0)
         return res.status(404).json({ msg: "no tickets found" });
       return res.status(200).json({ data: ticket });
     }
     const tickets = await Ticket.find({ requestee_id: userid })
-      .populate("asset_name")
+      .populate("asset_id")
       .exec();
     const total = tickets.length;
     if (total === 0) return res.status(404).json({ msg: "no tickets found" });
@@ -135,7 +135,7 @@ const getRequesteeOneTicket = async (req, res) => {
     const ticketid = req.params.ticketid;
 
     const ticket = await Ticket.findOne({ _id: ticketid, requestee_id: userid })
-      .populate("asset_name")
+      .populate("asset_id")
       .exec();
     if (ticket.length === null)
       return res.status(404).json({ msg: "no tickets found" });
@@ -151,12 +151,8 @@ const addRequesteeTicket = async (req, res) => {
   try {
     //TODO check asset exists??, does location/floor/room exists
 
-    if (!req.body.asset_name) {
+    if (!req.body.asset_id) {
       return res.status(400).json({ msg: "asset field cannot be empty" });
-    }
-
-    if (!req.body.location) {
-      return res.status(400).json({ msg: "location field cannot be empty" });
     }
 
     const username = req.valid.username; // data retrived from token
@@ -199,7 +195,7 @@ const addSchedularTicket = async (
 ) => {
   try {
     // check previous assets schedule tickets and set status close if any open
-    // await Ticket.findOneAndUpdate({ asset_name: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
+    // await Ticket.findOneAndUpdate({ asset_id: asset_id, status: "open", ticket_type: "schdule" }, { $push: { status: "close" } }, { new: true })
 
     // monthly maintenance subject
     body = {
@@ -207,7 +203,7 @@ const addSchedularTicket = async (
       description: "schedule maintenance of asset " + asset_id,
       schedule_time: scheduledata,
       checklist: checklistdata,
-      asset_name: asset_id,
+      asset_id: asset_id,
       location: locationdata,
     };
 
@@ -312,7 +308,7 @@ const getAssetLocation = async (req, res) => {
         unit_or_building: req.query.building_no,
       })
         .select("subdivision")
-        .populate("subdivision.rooms.assets", "asset_name");
+        .populate("subdivision.rooms.assets", "asset_id");
       if (floorandrooms.length == 0)
         return res.status(404).json({ msg: "invalid unit/buliding no" });
       return res.status(200).json(floorandrooms);

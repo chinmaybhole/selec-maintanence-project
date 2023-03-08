@@ -124,7 +124,8 @@ const addUser = async (req, res) => {
                 return res.status(201).json({ msg: "user created successfully" });
             }
             if (err) {
-                return res.status(501).json({ msg: "an error occured, try again" });
+
+                return res.status(501).json({ msg: err });
             }
         });
     } catch (error) {

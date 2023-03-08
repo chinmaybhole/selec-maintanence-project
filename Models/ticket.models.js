@@ -118,7 +118,6 @@ const ticket = Schema(
     },
     location: {
       type: locationdata,
-      required: true,
     },
     checklist: {
       type: Schema.Types.ObjectId,
