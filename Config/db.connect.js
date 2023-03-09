@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
-require('dotenv').config({ path: '.env' });
+require("dotenv").config({ path: ".env" });
 
 module.exports = function connection() {
-    mongoose.connect(process.env.DB_CONNECTION, {
-        useNewUrlParser: true
-    })
+  mongoose.connect(process.env.DB_CONNECTION, {
+    useNewUrlParser: true,
+  });
 
-    db = mongoose.connection;
-    db.on("error", console.error.bind(console, "connection error: "));
-    db.once("connected", () => {
-        console.log("Connected successfully");
-    })
+  db = mongoose.connection;
+  db.on("error", console.error.bind(console, "connection error: "));
+  db.once("connected", () => {
+    console.log("Connected successfully");
+  });
 };

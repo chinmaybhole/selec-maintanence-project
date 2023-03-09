@@ -11,6 +11,8 @@ const multer = require("multer");
 const upload = multer({ dest: "tmp/csv/" });
 const fs = require("fs");
 const { validateCsvData } = require("../Helper/master.helper.js");
+const { addTemp } = require("../Models/addtemplate.model");
+const mongoose = require("mongoose");
 
 router = express.Router();
 
@@ -30,6 +32,7 @@ router.get(
   select_template
 );
 
+// Validation & Database
 router.post("/upload_csv", upload.single("file"), async (req, res) => {
   try {
     const fileRows = [];
@@ -58,4 +61,31 @@ router.post("/upload_csv", upload.single("file"), async (req, res) => {
     res.status(500).send(err);
   }
 });
+
+router.delete("/delete_template", async (req, res) => {
+  // template name as an input and delete that template name from add_Temp
+  // Template should not be able to delete template data if any data is there if no data then delete it
+  try {
+    const temp_name = req.body.template_name;
+    const temp = await addTemp.deleteOne({ template_name: temp_name });
+
+    res.status(200).send(temp);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+router.patch("/update_template", async (req, res) => {
+  //
+  try {
+    const temp_name = req.body.template_name;
+    const temp = await addTemp.findOne({ template_name: temp_name });
+    res.status(200).send(temp);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
 module.exports = router;

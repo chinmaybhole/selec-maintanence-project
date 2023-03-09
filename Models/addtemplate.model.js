@@ -7,6 +7,7 @@ const addSchema = new Schema(
     template_name: {
       type: String,
       require: true,
+      unique: true,
     },
     schema_structure: [Schema.Types.Mixed],
   },
