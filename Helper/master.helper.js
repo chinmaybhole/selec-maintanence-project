@@ -10,18 +10,17 @@ const validateCsvData = (rows) => {
   }
   return false;
 };
-
+// We need to add Dynamic Validation based on AddTemp model
 function validateCsvRow(row) {
   if (!row[0]) {
     return "invalid Asset Name";
-  } else if (!Number.isInteger(Number(row[1]))) {
-    return "invalid Asset ID";
-  } else if (!row[2]) {
-    return "Category does not exist";
+  } else if (!row[1]) {
+    return "invalid Description";
+  } else if (row[2]) {
+    return "invalid Model name";
+  } else if (!row[3]) {
+    return "Invalid Area";
   }
-  //   else if (!moment(row[2], "YYYY-MM-DD").isValid()) {
-  //     return "invalid date of birth";
-  //   }
   return false;
 }
 
