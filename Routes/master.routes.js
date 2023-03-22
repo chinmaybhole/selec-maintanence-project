@@ -49,75 +49,17 @@ router.post("/upload_csv", upload.single("file"), async (req, res) => {
       dynamicSchema
     );
 
-    // res.send({ newModel });
-
-    // csv
-    //   .parseFile(req.file.path)
-    //   .on("data", (data) => {
-    //     console.log(data);
-    //     fileRows.push(data); // push each row
-    // const newModel = new Model(data);
-    // newModel.save().then(() => console.log("Save csv data"));
-    //   })
-    // .on("end", () => {
-    //   console.log(fileRows);
-    //   // Database me entry Helper function
-    //   fs.unlinkSync(req.file.path); // remove temp file
-    //   //process "fileRows" and respond
-    //   // const validationError = validateCsvData(fileRows);
-    //   // if (validationError) {
-    //   //   console.log("Hello World!!!");
-    //   //   return res.status(403).json({ error: validationError });
-    //   // }
-
-    //   // For loop model.collection.insert({asset_name: ${row[0]},asset_id: ${row[1]},Category: ${row[2]}})
-    //   res.status(202).send(`${model} : Template name  `);
-    // });
-    // const fileRows = [];
-    // open uploaded file
-
     const jsonData = await csvtojson().fromFile(req.file.path);
-    console.log(jsonData);
     for (const row of jsonData) {
       // validate each row here and add any errors to the `errors` array
       try {
-        console.log("Hello world", row);
         const newModel = new Model(row);
         await newModel.save();
       } catch (err) {
-        console.log("Catchhh");
         errors.push(err.message);
       }
     }
     res.status(200).send(`${model} : Template name  `);
-    // Upload csv new model using model name
-    // if (!foundtemplate) {
-    //   const newtemp = new addTemp({ template_name });
-    //   // foundtemplate = await newtemp.save();
-    //   csv
-    //     .parseFile(req.file.path)
-    //     .on("data", (data) => {
-    //       await collection1.insertOne(data)
-    //       fileRows.push(data); // push each row
-    //     })
-    //     .on("end", () => {
-    //       // Database me entry Helper function
-    //       fs.unlinkSync(req.file.path); // remove temp file
-    //       //process "fileRows" and respond
-    //       const validationError = validateCsvData(fileRows);
-    //       if (validationError) {
-    //         return res.status(403).send(validationError);
-    //       }
-    //       // For loop model.collection.insert({asset_name: ${row[0]},asset_id: ${row[1]},Category: ${row[2]}})
-    //     });
-    //   res.status(202).send(`File Rows: ${fileRows}`);
-    // }
-    // res.status(400).send("Template already exists,try other template name");
-    // } catch (err) {
-    //   res.status(500).send(err);
-    // }
-
-    // res.status(200).json({ message: "Data saved successfully" });
   } catch (err) {
     console.log(err);
     res.status(500).send("Err");
