@@ -56,4 +56,4 @@ const assetsConfig = new Schema(
 
 let assetsconfig = mongoose.model("assetsConfig", assetsConfig);
 let Asset = mongoose.model("assetData", assetData);
-module.exports = { assetsconfig, Asset };
+module.exports = { assetsconfig, Asset, assetData };

@@ -28,9 +28,9 @@ const add_asset_templates = async (req, res) => {
 
     await addtemplate.save();
 
-    res.status(200).send(addtemplate);
+    res.status(200).send(`${NewSchema}`);
   } catch (err) {
-    console.log(err);
+    res.status(501).send(err);
   }
 };
 

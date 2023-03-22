@@ -16,7 +16,7 @@ function validateCsvRow(row) {
     return "invalid Asset Name";
   } else if (!row[1]) {
     return "invalid Description";
-  } else if (row[2]) {
+  } else if (!row[2]) {
     return "invalid Model name";
   } else if (!row[3]) {
     return "Invalid Area";
