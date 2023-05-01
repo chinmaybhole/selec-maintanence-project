@@ -81,11 +81,11 @@ const ticketDisplay = async (req, res) => {
     for (let i in userskills) {
       let userskill = userskills[i].toString();
       const filteredTicket = await Ticket.find({
-        asset_name: userskill,
+        asset_id: userskill,
         accepted_by: null,
         ticket_type: "trouble",
       })
-        .populate("asset_name", "asset_name")
+        .populate("asset_id", "asset_id")
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .exec();
@@ -105,7 +105,7 @@ const ticketDisplay = async (req, res) => {
         let displayTicket = {
           _id: filteredTicketsList[i]._id,
           subject: filteredTicketsList[i].subject,
-          asset_name: filteredTicketsList[i].asset_name,
+          asset_id: filteredTicketsList[i].asset_id,
           description: filteredTicketsList[i].description,
           status: filteredTicketsList[i].status,
           openat: filteredTicketsList[i].open_at,
@@ -121,7 +121,7 @@ const ticketDisplay = async (req, res) => {
       totalcount: info.length,
     });
   } catch (error) {
-    return res.status(500).json({ error: error });
+    return res.status(500).json({ error: error.message });
   }
 };
 

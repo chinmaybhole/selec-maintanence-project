@@ -1,10 +1,9 @@
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const connection = require('./Config/db.connect')
-const cors = require('cors')
-require('dotenv').config({ path: './Config/.env' });
-const { agenda, init } = require('./Config/agendaconfig');
+const express = require("express");
+const bodyParser = require("body-parser");
+const connection = require("./Config/db.connect");
+const cors = require("cors");
+require("dotenv").config({ path: "./Config/.env" });
+const { agenda, init } = require("./Config/agendaconfig");
 // init()
 var Agendash = require("agendash");
 // initialize express
@@ -40,24 +39,6 @@ app.get("/", (req, res) => {
   res.send("Selec Server");
 });
 
-//Testing post of master template
-// app.post("/master/add_asset_templates", (req, res) => {
-//   try {
-//     // req.body = utils.lowercasedata(req.body)
-//     let jsonData = req.body;
-//     let name = req.body.template_name;
-//     delete jsonData["template_name"];
-//     let MongooseSchema = generateSchema.mongoose(jsonData);
-//     // primary_keys and elements DEFAULT parameter
-//     // console.log(typeof(MongooseSchema));
-//     template = mongoose.model(name + "Template", MongooseSchema);
-//     res.json({ msg: `Template name created ${name}Template` });
-//   } catch (error) {
-//     console.log(error);
-//     res.json({ message: error.message });
-//   }
-// });
-
 app.post("/master/add_asset_templates", (req, res) => {
   try {
     const schema = req.body;
@@ -87,6 +68,17 @@ app.post("/master/testing_template", (req, res) => {
   }
 });
 
+app.use("*", (req, res) => {
+  return res.status(404).json({ msg: "Request Not Found" });
+});
+
+// app connection
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Cors-enable Server running on http://localhost:${PORT}`);
+});
+
 // app.post("/master/add_assets", (req, res) => {
 //   // Add Assets from CSV
 //   try {
@@ -113,14 +105,20 @@ app.post("/master/testing_template", (req, res) => {
 //   }
 // });
 
-app.use("*", (req, res) => {
-  return res.status(404).json({ msg: "Request Not Found" });
-});
-
-// app connection
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Cors-enable Server running on http://localhost:${PORT}`);
-});
-
+//Testing post of master template
+// app.post("/master/add_asset_templates", (req, res) => {
+//   try {
+//     // req.body = utils.lowercasedata(req.body)
+//     let jsonData = req.body;
+//     let name = req.body.template_name;
+//     delete jsonData["template_name"];
+//     let MongooseSchema = generateSchema.mongoose(jsonData);
+//     // primary_keys and elements DEFAULT parameter
+//     // console.log(typeof(MongooseSchema));
+//     template = mongoose.model(name + "Template", MongooseSchema);
+//     res.json({ msg: `Template name created ${name}Template` });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ message: error.message });
+//   }
+// });

@@ -52,7 +52,63 @@ const select_template = async (req, res) => {
     console.log(err);
   }
 };
-module.exports = { add_asset_templates, add_asset, select_template };
+
+const uploadAndValidateCsv = async (req, res) => {
+  /* 
+  Validate the csv data according to the template name and add to the asset collections 
+  - Add to asset collection
+  - Validate the data
+  */
+  try {
+    const model = req.body.template_name;
+    // open uploaded file
+    const modelName = await addTemp.findOne({ template_name: model });
+
+    const schema = modelName.schema_structure[0];
+    const dynamicSchema = new mongoose.Schema(schema);
+    const Model = mongoose.model(
+      `${modelName.template_name}temps`,
+      dynamicSchema
+    );
+
+    const jsonData = await csvtojson().fromFile(req.file.path);
+    for (const row of jsonData) {
+      // validate each row here and add any errors to the `errors` array
+      try {
+        const newModel = new Model(row);
+        await newModel.save();
+      } catch (err) {
+        errors.push(err.message);
+      }
+    }
+    res.status(200).send(`${model} : Template name  `);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Err");
+  }
+};
+
+const deleteTemplate = async (req, res) => {
+  // template name as an input and delete that template name from add_Temp
+  // Template should not be able to delete template data if any data is there if no data then delete it
+  try {
+    const temp_name = req.body.template_name;
+    const temp = await addTemp.deleteOne({ template_name: temp_name });
+
+    res.status(200).send(temp);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+};
+
+module.exports = {
+  add_asset_templates,
+  add_asset,
+  select_template,
+  uploadAndValidateCsv,
+  deleteTemplate,
+};
 //Testing post of master template
 // app.post("/master/add_asset_templates", (req, res) => {
 //   try {
